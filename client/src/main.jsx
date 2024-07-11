@@ -8,6 +8,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <Routes>
       <Route path="/" component={<App />} />
+      <Route path="/chat"/>
     </Routes>
   </BrowserRouter>
 );

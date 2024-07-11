@@ -1,26 +1,85 @@
-import { useState } from "react";
-import {io} from "socket.io-client"
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import { useNavigate } from "react-router-dom";
 
 function App() {
+  const navigate = useNavigate();
   const [joinSessionKey, setJoinSessionKey] = useState("");
-  const socket = io('http://localhost:4001');
+  const socket = io("http://localhost:4001");
 
+
+  useEffect(() => {
+    const handleNewKeyGenerateSuccess = (obj) => {
+      try {
+        if (obj.isSuccess) {
+          navigate("/chat", {
+            state: { SocketId: obj.socketId, roomId: obj.roomId },
+          });
+        } else {
+          console.log("Error while creating the session");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    socket.on("newKeyGenerateSucces", handleNewKeyGenerateSuccess);
+
+    return () => {
+      socket.off("newKeyGenerateSucces", handleNewKeyGenerateSuccess)
+    }
+  }, [socket, navigate]);
+
+
+  useEffect(() => {
+    const handleAlreadyGeneratedKeySuccess = (obj) => {
+      try {
+        if (obj.isSuccess) {
+          navigate("/chat", {
+            state:{Socketid:obj.SocketId, roomId:obj.roomId}
+          })
+        }
+        else {
+          console.log("Couldn't Enter the session");
+        }
+      }
+      catch (e) {
+        console.error(e);
+      }
+    }
+
+    socket.on("joinAlreadyGeneratedSessionSuccess", handleAlreadyGeneratedKeySuccess);
+
+
+    return () => {
+      socket.off("joinAlreadyGeneratedSessionSuccess", handleAlreadyGeneratedKeySuccess);
+    }
+  },[socket])
+   
+  const handleGenerateNewKey = () => {
+    socket.on("connect", () => {
+      socket.emit("generateNewSession");
+   })
+  };
+
+  
   const handleInputChange = (e) => {
     setJoinSessionKey(e.target.value);
-  }
+  };
 
   const handleInputSessionKey = (e) => {
     e.preventDefault();
-    // Validate the Input key from the backend if true, allow to join the session else throw error
-    const sessionKey = joinSessionKey;
-  }
+    socket.on("connect", () => {
+      socket.emit("joinAlreadyGeneratedSession", joinSessionKey);
+   })
+  };
 
-  const handleGenerateNewKey = () => {
-    // validate if the session is created from the backenc and then route the user to tbhat specified room . else throw error
-  }
+ 
   return (
     <div>
-      <button className="generate" onClick={handleGenerateNewKey}>Create new Session</button>
+      <button className="generate" onClick={handleGenerateNewKey}>
+        Create new Session
+      </button>
       <div className="join-session">
         <form onSubmit={handleInputSessionKey}>
           <input
@@ -31,6 +90,7 @@ function App() {
             value={joinSessionKey}
             onChange={handleInputChange}
           />
+          <button type="submit">Join Session</button>
         </form>
       </div>
     </div>
