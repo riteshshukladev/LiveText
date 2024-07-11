@@ -1,7 +1,8 @@
 import React from "react";
 
 
-const Chat = () => {
+
+const chatPage = () => {
     return (
         <div>
           <div className="socket_print">
@@ -29,3 +30,5 @@ const Chat = () => {
         </div>
   );
 }
+
+export default chatPage;
