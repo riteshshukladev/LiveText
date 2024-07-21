@@ -1,17 +1,22 @@
-import { useContext, createContext } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useMemo, useContext, createContext } from "react";
 import { io } from "socket.io-client";
-import { useNavigate } from "react-router-dom";
+import { useHref, useNavigate, useHistory} from "react-router-dom";
 
 
-const socketContext = createContext({});
+const socketContext = createContext({
+  joinSessionKey: "",
+  socket: null,
+  handleGenerateNewKey: () => { },
+  handleInputSessionKey: () => { },
+  handleInputChange :() =>{}
+});
 
-export const useSocket = useContext(socketContext);
 
-const socketContextAPI = ({ children }) => {
+
+const SocketContextAPI = ({ children }) => {
   const navigate = useNavigate();
   const [joinSessionKey, setJoinSessionKey] = useState("");
-  const socket = io("http://localhost:4001");
+  const socket = useMemo(() => io("http://localhost:4001"), []);
 
   useEffect(() => {
     const handleNewKeyGenerateSuccess = (obj) => {
@@ -88,8 +93,11 @@ const socketContextAPI = ({ children }) => {
     handleInputSessionKey
     };
 
-  return;
-  <socketContext.Provider value={value}>{children}</socketContext.Provider>;
+  return(
+    <socketContext.Provider value={value}>{children}</socketContext.Provider>
+  )
 };
 
-export default socketContextAPI;
+
+export const useSocket = () => useContext(socketContext);
+export default SocketContextAPI;
