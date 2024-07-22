@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <SocketContextAPI>
     <Routes>
       <Route path="/" element={<App />} />
-      <Route path="/chat" element={<ChatPage/>}/>
+      <Route path="/chat/:roomId" element={<ChatPage/>}/>
       </Routes>
     </SocketContextAPI>
   </BrowserRouter>

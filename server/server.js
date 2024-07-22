@@ -1,20 +1,11 @@
 import express from 'express';
-import { Server as socketIOServer } from 'socket.io';
-import { createServer, METHODS } from 'http';
+import cors from "cors";
+import http from "http"
 
 
-const port = 4001;
+
 const app = express();
-const server = createServer(app);
-const io = new socketIOServer(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
-});
+const server = http.createServer(app);
 
-
-
-server.listen(port, () => {
-  console.log(`server is running on port ${port}`);
-});
+app.use(cors());
+app.use(express.json());

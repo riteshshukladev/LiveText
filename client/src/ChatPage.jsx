@@ -1,10 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 
 const ChatPage = () => {
 
-  const { socket, socketId, roomId} = useLocation();
+  const { socket, socketId, roomId } = useLocation();
+  
+
+  useEffect(() => {
+    if (socket && roomId) {
+      socket.emit("joinRoom", { roomId });
+
+    }
+  }, [socket, roomId]);
   
   const [msgIndividual, setMsgIndividual] = useState("");
   const [allMessages, setAllMessages] = useState([]);

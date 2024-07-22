@@ -1,103 +1,72 @@
-import { useEffect, useState,useMemo, useContext, createContext } from "react";
-import { io } from "socket.io-client";
-import { useHref, useNavigate, useHistory} from "react-router-dom";
-
+import { useEffect, useState, useMemo, useContext, createContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 const socketContext = createContext({
   joinSessionKey: "",
   socket: null,
-  handleGenerateNewKey: () => { },
-  handleInputSessionKey: () => { },
-  handleInputChange :() =>{}
+  handleGenerateNewKey: () => {},
+  handleInputSessionKey: () => {},
+  handleInputChange: () => {},
 });
-
-
 
 const SocketContextAPI = ({ children }) => {
   const navigate = useNavigate();
   const [joinSessionKey, setJoinSessionKey] = useState("");
-  const socket = useMemo(() => io("http://localhost:4001"), []);
+  const urlEndPoint = "http://localhost:4001";
+  const socket = useMemo(() => io(urlEndPoint), []);
 
-  useEffect(() => {
-    const handleNewKeyGenerateSuccess = (obj) => {
-      try {
-        if (obj.isSuccess) {
-          navigate("/chat", {
-            state: { SocketId: obj.socketId, roomId: obj.roomId },
-          });
-        } else {
-          console.log("Error while creating the session");
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
 
-    socket.on("newKeyGenerateSucces", handleNewKeyGenerateSuccess);
-
-    return () => {
-      socket.off("newKeyGenerateSucces", handleNewKeyGenerateSuccess);
-    };
-  }, [socket, navigate]);
-
-  useEffect(() => {
-    const handleAlreadyGeneratedKeySuccess = (obj) => {
-      try {
-        if (obj.isSuccess) {
-          navigate("/chat", {
-            state: { Socketid: obj.SocketId, roomId: obj.roomId },
-          });
-        } else {
-          console.log("Couldn't Enter the session");
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    socket.on(
-      "joinAlreadyGeneratedSessionSuccess",
-      handleAlreadyGeneratedKeySuccess
-    );
-
-    return () => {
-      socket.off(
-        "joinAlreadyGeneratedSessionSuccess",
-        handleAlreadyGeneratedKeySuccess
-      );
-    };
-  }, [socket, navigate]);
-
-  const handleGenerateNewKey = () => {
-    socket.on("connect", () => {
-      socket.emit("generateNewSession");
-    });
+  const handleGenerateNewKey = async () => {
+    try {
+      const response = await fetch(`${urlEndPoint}/create-room`, {
+        method: "post",
+      });
+      const data = await response.json();
+      navigate(`/chat/${data.roomId}`, {
+        state: { roomId: data.roomId, socketId: data.socketId },
+      });
+    } catch (err) {
+      alert("Error while creating new room");
+    }
   };
 
   const handleInputChange = (e) => {
     setJoinSessionKey(e.target.value);
   };
 
-  const handleInputSessionKey = (e) => {
+  const handleInputSessionKey = async (e) => {
     e.preventDefault();
-    socket.on("connect", () => {
-      socket.emit("joinAlreadyGeneratedSession", joinSessionKey);
-    });
-    };
-    
+
+    try {
+      const response = await fetch(`${urlEndPoint}/join-room`,
+      {
+        method: "post",
+        Headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ joinSessionKey }),
+        });
+      
+      if (response.ok) {
+        navigate(`/chat/${joinSessionKey}`, {
+          state: { roomId: data.roomId, socketId: data.socketId },
+        });
+      }
+    } catch (err) {
+      alert("Error while joining session");
+    }
+  };
+
   const value = {
     joinSessionKey,
     socket,
     handleGenerateNewKey,
     handleInputChange,
-    handleInputSessionKey
-    };
+    handleInputSessionKey,
+  };
 
-  return(
+  return (
     <socketContext.Provider value={value}>{children}</socketContext.Provider>
-  )
+  );
 };
-
 
 export const useSocket = () => useContext(socketContext);
 export default SocketContextAPI;
