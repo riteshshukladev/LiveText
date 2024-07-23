@@ -17,5 +17,7 @@ initializeSocket();
 
 connectDatabase();
 
+app.use('/', roomRoutes);
+
 
 

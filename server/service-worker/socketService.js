@@ -3,7 +3,7 @@ const { Server } = require("socket.io");
 
 
 import { Server } from "socket.io";
-import {Room} from "../"
+import {Room} from "../models/room"
 
 let io;
 
@@ -19,10 +19,20 @@ const initializeSocket = (server) => {
     console.log('A user connected');
 
     socket.on('joinRoom', async ({ roomId }) => {
-      const room = await Room.findOne({ roomId });
+      try {
+        const room = await Room.findOne({ roomId });
       if (room) {
+        if (!room.socketIdsJoined.includes(socket.id)) {
+          room.socketIdsJoined.push(socket.id);
+          await room.save();
+        }
         socket.join(roomId);
-        console.log(`User ${socket.id} joined room ${roomId}`);
+        console.log(`socketId ${socket.id} has joined the chat`);
+        
+      }
+      }
+      catch (err) {
+        console.error('Error joining room:', err);
       }
     });
 
@@ -34,7 +44,7 @@ const initializeSocket = (server) => {
     });
 
     socket.on('disconnect', () => {
-      console.log('A user disconnected');
+      
     });
   });
 };
