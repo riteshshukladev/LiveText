@@ -43,8 +43,23 @@ const initializeSocket = (server) => {
       });
     });
 
-    socket.on('disconnect', () => {
-      
+    socket.on('disconnect', async () => {
+      try {
+        const rooms = await Room.findOne({ socketIdsJoined: socket.id });
+
+        for ( let room of rooms) {
+          room.socketIdsJoined = room.socketIdsJoined.filter(id => id !== socket.id);
+          await room.save();
+
+          io.to(room.roomId).emit('userLeft', { socketId: socket.id });
+
+          console.log(`A user has been left socketId : ${socket.id}`);
+        }
+
+      }
+      catch (err) {
+        console.error(`some error occured while disconnecting : ${err}`);
+      }
     });
   });
 };
