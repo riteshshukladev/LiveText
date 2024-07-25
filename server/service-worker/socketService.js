@@ -1,9 +1,5 @@
-
-const { Server } = require("socket.io");
-
-
 import { Server } from "socket.io";
-import {Room} from "../models/room"
+import Room from "../models/Room.js";
 
 let io;
 
@@ -11,53 +7,51 @@ const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: "*",
-      methods: ["GET", "POST"]
-    }
+      methods: ["GET", "POST"],
+    },
   });
 
-  io.on('connection', (socket) => {
-    console.log('A user connected');
+  io.on("connection", (socket) => {
+    console.log(`A user connected with socketId ${socket.id}` );
 
-    socket.on('joinRoom', async ({ roomId }) => {
+    socket.on("joinRoom", async ({ roomId }) => {
       try {
         const room = await Room.findOne({ roomId });
-      if (room) {
-        if (!room.socketIdsJoined.includes(socket.id)) {
-          room.socketIdsJoined.push(socket.id);
-          await room.save();
+        if (room) {
+          if (!room.socketIdsJoined.includes(socket.id)) {
+            room.socketIdsJoined.push(socket.id);
+            await room.save();
+          }
+          socket.join(roomId);
+          console.log(`socketId ${socket.id} has joined the chat`);
         }
-        socket.join(roomId);
-        console.log(`socketId ${socket.id} has joined the chat`);
-        
-      }
-      }
-      catch (err) {
-        console.error('Error joining room:', err);
+      } catch (err) {
+        console.error("Error joining room:", err);
       }
     });
 
-    socket.on('sendMessage', ({ recievedMessage, roomId, socketId }) => {
-      io.to(roomId).emit('recievedMessage', {
+    socket.on("sendMessage", ({ recievedMessage, roomId, socketId }) => {
+      io.to(roomId).emit("recievedMessage", {
         senderId: socketId,
-        Message: recievedMessage
+        Message: recievedMessage,
       });
     });
 
-    socket.on('disconnect', async () => {
+    socket.on("disconnect", async () => {
       try {
         const rooms = await Room.findOne({ socketIdsJoined: socket.id });
 
-        for ( let room of rooms) {
-          room.socketIdsJoined = room.socketIdsJoined.filter(id => id !== socket.id);
+        for (let room of rooms) {
+          room.socketIdsJoined = room.socketIdsJoined.filter(
+            (id) => id !== socket.id
+          );
           await room.save();
 
-          io.to(room.roomId).emit('userLeft', { socketId: socket.id });
+          io.to(room.roomId).emit("userLeft", { socketId: socket.id });
 
           console.log(`A user has been left socketId : ${socket.id}`);
         }
-
-      }
-      catch (err) {
+      } catch (err) {
         console.error(`some error occured while disconnecting : ${err}`);
       }
     });
