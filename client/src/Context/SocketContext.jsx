@@ -14,15 +14,26 @@ const SocketContextAPI = ({ children }) => {
   const navigate = useNavigate();
   const [joinSessionKey, setJoinSessionKey] = useState("");
   const urlEndPoint = "http://localhost:4001";
-  const [socket, setSocket] = useSocket("");
+  const [socket, setSocket] = useState("");
 
-  const connectSocket = () => {
-    if (!socket) {
-      const newSocket = io(urlEndPoint);
-      setSocket(newSocket);
-      return newSocket;
-    }
-    return socket;
+  const connectSocket = async () => {
+    return new Promise((resolve) => {
+      if (!socket) {
+        const newSocket = io(urlEndPoint);
+
+        newSocket.on('connect', () => {
+          setSocket(newSocket);
+          resolve(newSocket);
+        });
+
+        newSocket.on('connect_error', (error) => {
+          console.error('Socket connection error:', error);
+          resolve(null);
+        });
+      } else {
+        resolve(socket);
+      }
+    });
   };
 
   const handleGenerateNewKey = async () => {
@@ -35,17 +46,15 @@ const SocketContextAPI = ({ children }) => {
       });
       if (response.ok) {
         const data = await response.json();
-        newSocket.emit('joinRoom', { roomId: data.roomId });
+        newSocket.emit("joinRoom", { roomId: data.roomId });
         navigate(`/chat/${data.roomId}`, {
           state: { roomId: data.roomId, socketId: newSocket.id },
         });
+      } else {
+        throw new Error("Room creation unsuccesfull");
       }
-      else {
-        throw new Error("Error while creating the room")
-      }
-    }
-     catch (err) {
-      alert(`Error while creating the room: ${err}`);
+    } catch (err) {
+      alert(`Problem while creating the room: ${err}`);
     }
   };
 
@@ -57,19 +66,28 @@ const SocketContextAPI = ({ children }) => {
     e.preventDefault();
 
     try {
+      const newSocket = await connectSocket();
+
       const response = await fetch(`${urlEndPoint}/join-room`, {
         method: "post",
-        Headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ joinSessionKey }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: joinSessionKey,
+          socketId: newSocket.id,
+        }),
       });
 
       if (response.ok) {
-        navigate(`/chat/${joinSessionKey}`, {
-          state: { roomId: data.roomId, socketId: data.socketId },
+        const data = await response.json();
+        navigate(`/chat/${data.roomId}`, {
+          state: { roomId: data.roomId, socketId: newSocket.id },
         });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData || "error while joining the room");
       }
     } catch (err) {
-      alert("Error while joining session");
+      alert(`There was a problem while joining session ${err}`);
     }
   };
 

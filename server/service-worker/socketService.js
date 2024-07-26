@@ -14,11 +14,11 @@ const initializeSocket = (server) => {
   io.on("connection", (socket) => {
     console.log(`A user connected with socketId ${socket.id}` );
 
-    socket.on("joinRoom", async ({ roomId }) => {
+    socket.on("joinRoom", async ({ roomId,socketId }) => {
       try {
         const room = await Room.findOne({ roomId });
         if (room) {
-          if (!room.socketIdsJoined.includes(socket.id)) {
+          if (!room.socketIdsJoined.includes(socketId)) {
             room.socketIdsJoined.push(socket.id);
             await room.save();
           }
@@ -30,13 +30,12 @@ const initializeSocket = (server) => {
       }
     });
 
-    socket.on("sendMessage", ({ recievedMessage, roomId, socketId }) => {
+    socket.on("sendMessage", ({ msgIndividual, roomId, socketId }) => {
       io.to(roomId).emit("recievedMessage", {
         senderId: socketId,
-        Message: recievedMessage,
+        Message: msgIndividual,
       });
     });
-
     socket.on("disconnect", async () => {
       try {
         const rooms = await Room.findOne({ socketIdsJoined: socket.id });
