@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import  { useSocket } from "./Context/SocketContext";
+import  { useSocket } from "../Context/SocketContext";
 
 const ChatPage = () => {
 
