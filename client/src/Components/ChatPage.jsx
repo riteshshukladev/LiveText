@@ -16,14 +16,11 @@ const ChatPage = () => {
   const [allMessages, setAllMessages] = useState({});
  
 
-  // useEffect(() => {
-  //   if (socket && roomId) {
-  //     socket.emit("joinRoom", { roomId });
-
-  //   }
-  // }, [socket, roomId]);
-
-  // console.log(roomId);
+  useEffect(() => {
+    if (socket) {
+      socket.emit("joinRoom", { roomId, socketId });
+    }
+  }, []);
 
   useEffect(() => {
    
@@ -33,7 +30,6 @@ const ChatPage = () => {
           [data.senderId]: [data.Message],
         }));
       });
-    
     
   }, [socket]);
 

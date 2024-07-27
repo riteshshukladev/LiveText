@@ -23,7 +23,7 @@ const initializeSocket = (server) => {
             await room.save();
           }
           socket.join(roomId);
-          console.log(`socketId ${socket.id} has joined the chat`);
+          console.log(`socketId ${socket.id} has joined the room`);
         }
       } catch (err) {
         console.error("Error joining room:", err);

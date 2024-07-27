@@ -37,6 +37,7 @@ const SocketContextAPI = ({ children }) => {
   };
 
   const handleGenerateNewKey = async () => {
+    
     const newSocket = await connectSocket();
     try {
       const response = await fetch(`${urlEndPoint}/create-room`, {
