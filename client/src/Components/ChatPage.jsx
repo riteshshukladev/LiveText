@@ -19,6 +19,17 @@ const ChatPage = () => {
   useEffect(() => {
     if (socket) {
       socket.emit("joinRoom", { roomId, socketId });
+  
+      const handleBeforeUnload = () => {
+        socket.emit("leaveRoom", { roomId, socketId });
+      };
+  
+      window.addEventListener('beforeunload', handleBeforeUnload);
+  
+      return () => {
+        socket.emit("leaveRoom", { roomId, socketId });
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      }
     }
   }, []);
 

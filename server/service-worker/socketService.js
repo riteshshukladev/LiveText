@@ -12,9 +12,9 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(`A user connected with socketId ${socket.id}` );
+    console.log(`A user connected with socketId ${socket.id}`);
 
-    socket.on("joinRoom", async ({ roomId,socketId }) => {
+    socket.on("joinRoom", async ({ roomId, socketId }) => {
       try {
         const room = await Room.findOne({ roomId });
         if (room) {
@@ -36,24 +36,34 @@ const initializeSocket = (server) => {
         Message: msgIndividual,
       });
     });
-    socket.on("disconnect", async () => {
-      try {
-        const rooms = await Room.findOne({ socketIdsJoined: socket.id });
 
-        for (let room of rooms) {
+    socket.on("leaveRoom", async ({ roomId, socketId }) => {
+      
+      try {
+        const room = await Room.findOne({
+          roomId,
+        });
+        if (room && room.socketIdsJoined.includes(socketId)) {
           room.socketIdsJoined = room.socketIdsJoined.filter(
-            (id) => id !== socket.id
+            (AllsocketIds) => AllsocketIds !== socketId
           );
           await room.save();
-
-          io.to(room.roomId).emit("userLeft", { socketId: socket.id });
-
-          console.log(`A user has been left socketId : ${socket.id}`);
         }
+        socket.leave(roomId);
+        console.log(
+          `A user with socketId ${socketId} has exited the room ${roomId}`
+        );
       } catch (err) {
-        console.error(`some error occured while disconnecting : ${err}`);
+        console.error(
+          `Error while exiting the user ${socketId} from the room ${roomId}:`,
+          err
+        );
       }
     });
+    // socket.on("disconnect", async () => {
+
+    //   console.log(`user disconnected successfully`);
+    // });
   });
 };
 
