@@ -47,7 +47,7 @@ const SocketContextAPI = ({ children }) => {
       });
       if (response.ok) {
         const data = await response.json();
-        newSocket.emit("joinRoom", { roomId: data.roomId });
+      
         navigate(`/chat/${data.roomId}`, {
           state: { roomId: data.roomId, socketId: newSocket.id },
         });

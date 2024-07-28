@@ -44,10 +44,16 @@ const initializeSocket = (server) => {
           roomId,
         });
         if (room && room.socketIdsJoined.includes(socketId)) {
-          room.socketIdsJoined = room.socketIdsJoined.filter(
-            (AllsocketIds) => AllsocketIds !== socketId
-          );
-          await room.save();
+
+          if (room.socketIdsJoined.length === 1) {
+            await Room.findOneAndDelete({ roomId });
+          }
+          else {
+            room.socketIdsJoined = room.socketIdsJoined.filter(
+              (AllsocketIds) => AllsocketIds !== socketId
+            );
+            await room.save();
+          }
         }
         socket.leave(roomId);
         console.log(
