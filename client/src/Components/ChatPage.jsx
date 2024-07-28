@@ -1,31 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-
-import  { useSocket } from "../Context/SocketContext";
+import { useSocket } from "../Context/SocketContext";
 
 const ChatPage = () => {
-
-  const {socket} = useSocket();
-
+  const { socket } = useSocket();
   console.log(socket);
 
   const location = useLocation();
-
   const { roomId, socketId } = location.state;
   const [msgIndividual, setMsgIndividual] = useState("");
   const [allMessages, setAllMessages] = useState({});
- 
 
   useEffect(() => {
     if (socket) {
       socket.emit("joinRoom", { roomId, socketId });
-  
+
       const handleBeforeUnload = () => {
         socket.emit("leaveRoom", { roomId, socketId });
       };
-  
+
       window.addEventListener('beforeunload', handleBeforeUnload);
-  
+
       return () => {
         socket.emit("leaveRoom", { roomId, socketId });
         window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -34,21 +29,16 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-   
-      socket.on("recievedMessage", (data) => {
-        setAllMessages((prev) => ({
-          ...prev,
-          [data.senderId]: [data.Message],
-        }));
-      });
-    
+    socket.on("recievedMessage", (data) => {
+      setAllMessages((prev) => ({
+        ...prev,
+        [data.senderId]: [data.Message],
+      }));
+    });
   }, [socket]);
-
-  
 
   const handleMsgChange = (e) => {
     const { value } = e.target;
-
     setMsgIndividual(value);
     if (socket && roomId && msgIndividual.trim()) {
       socket.emit("sendMessage", {
@@ -59,28 +49,27 @@ const ChatPage = () => {
     }
   };
 
-  
   return (
-    <div>
-      <div className="socket_print">
-        <h1>Socket ID: {socketId}</h1>
-        {<h2>Room Key: {roomId}</h2>}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-cyan-900 text-white p-4">
+      <div className="socket_print bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-lg p-4 rounded-lg mb-4">
+        <h1 className="text-xl font-semibold text-cyan-400">Socket ID: <span className="text-white">{socketId}</span></h1>
+        <h2 className="text-lg text-gray-400">Room Key: <span className="font-medium text-cyan-400">{roomId}</span></h2>
       </div>
-      <form>
+      <form className="mb-4">
         <input
           type="text"
           onChange={handleMsgChange}
           placeholder="Enter message"
           value={msgIndividual}
+          className="w-full px-4 py-2 bg-gray-700 bg-opacity-50 text-white placeholder-gray-400 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
         />
       </form>
-      <div>
+      <div className="space-y-2">
         {Object.entries(allMessages).map(([senderId, msgs]) => (
-          <div key={senderId}>
-            <p>{senderId}:</p>
-
+          <div key={senderId} className="bg-gray-800 bg-opacity-50 p-3 rounded-lg">
+            <p className="font-semibold text-cyan-400">{senderId}:</p>
             {msgs.map((m, index) => (
-              <p key={index}>{m}</p>
+              <p key={index} className="text-gray-300 ml-4">{m}</p>
             ))}
           </div>
         ))}
