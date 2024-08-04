@@ -13,7 +13,7 @@ const socketContext = createContext({
 const SocketContextAPI = ({ children }) => {
   const navigate = useNavigate();
   const [joinSessionKey, setJoinSessionKey] = useState("");
-  const urlEndPoint = "http://localhost:4001";
+  const urlEndPoint = `${import.meta.env.VITE_API_URL}`;
   const [socket, setSocket] = useState("");
 
   const connectSocket = async () => {

@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import Room from "../models/Room.js";
+import Room from "../models/room.js";
 
 let io;
 
@@ -38,17 +38,14 @@ const initializeSocket = (server) => {
     });
 
     socket.on("leaveRoom", async ({ roomId, socketId }) => {
-      
       try {
         const room = await Room.findOne({
           roomId,
         });
         if (room && room.socketIdsJoined.includes(socketId)) {
-
           if (room.socketIdsJoined.length === 1) {
             await Room.findOneAndDelete({ roomId });
-          }
-          else {
+          } else {
             room.socketIdsJoined = room.socketIdsJoined.filter(
               (AllsocketIds) => AllsocketIds !== socketId
             );
