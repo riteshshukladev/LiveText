@@ -1,4 +1,12 @@
-import { useEffect, useState, useMemo, useContext, createContext } from "react";
+import { AwardIcon } from "lucide-react";
+import {
+  useEffect,
+  useState,
+  useMemo,
+  useContext,
+  createContext,
+  useRef,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 
@@ -8,6 +16,9 @@ const socketContext = createContext({
   handleGenerateNewKey: () => {},
   handleInputSessionKey: () => {},
   handleInputChange: () => {},
+  showNameModal: "",
+  handleNewNameSubmit: () => {},
+  onSkip: () => {},
 });
 
 const SocketContextAPI = ({ children }) => {
@@ -15,19 +26,23 @@ const SocketContextAPI = ({ children }) => {
   const [joinSessionKey, setJoinSessionKey] = useState("");
   const urlEndPoint = `${import.meta.env.VITE_API_URL}`;
   const [socket, setSocket] = useState("");
+  const [showNameModal, setShowNameModal] = useState(false);
+  const roomIdRef = useRef(null);
+  const socketIdRef = useRef(null);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const connectSocket = async () => {
     return new Promise((resolve) => {
       if (!socket) {
         const newSocket = io(urlEndPoint);
 
-        newSocket.on('connect', () => {
+        newSocket.on("connect", () => {
           setSocket(newSocket);
           resolve(newSocket);
         });
 
-        newSocket.on('connect_error', (error) => {
-          console.error('Socket connection error:', error);
+        newSocket.on("connect_error", (error) => {
+          console.error("Socket connection error:", error);
           resolve(null);
         });
       } else {
@@ -37,7 +52,6 @@ const SocketContextAPI = ({ children }) => {
   };
 
   const handleGenerateNewKey = async () => {
-    
     const newSocket = await connectSocket();
     try {
       const response = await fetch(`${urlEndPoint}/create-room`, {
@@ -47,10 +61,10 @@ const SocketContextAPI = ({ children }) => {
       });
       if (response.ok) {
         const data = await response.json();
-      
-        navigate(`/chat/${data.roomId}`, {
-          state: { roomId: data.roomId, socketId: newSocket.id },
-        });
+        roomIdRef.current = data.roomId;
+        socketIdRef.current = newSocket.id;
+        setShowNameModal(true);
+        setPendingNavigation({ roomId: data.roomId, socket: newSocket.id });
       } else {
         throw new Error("Room creation unsuccesfull");
       }
@@ -80,9 +94,13 @@ const SocketContextAPI = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        navigate(`/chat/${data.roomId}`, {
-          state: { roomId: data.roomId, socketId: newSocket.id },
-        });
+        roomIdRef.current = data.roomId;
+        socketIdRef.current = newSocket.id;
+        setShowNameModal(true);
+        // navigate(`/chat/${data.roomId}`, {
+        //   state: { roomId: data.roomId, socketId: newSocket.id },
+        // });
+        setPendingNavigation({ roomId: data.roomId, socket: newSocket.id });
       } else {
         const errorData = await response.json();
         throw new Error(errorData || "error while joining the room");
@@ -92,12 +110,61 @@ const SocketContextAPI = ({ children }) => {
     }
   };
 
+  const handleNewNameSubmit = async (name) => {
+    try {
+      const response = await fetch(`${urlEndPoint}/set-name`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: roomIdRef.current,
+          socketId: socketIdRef.current,
+          name: name,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setShowNameModal(false);
+        if (pendingNavigation) {
+          navigate(`/chat/${pendingNavigation.roomId}`, {
+            state: {
+              roomId: pendingNavigation.roomId,
+              socketId: pendingNavigation.socket,
+              userName: name
+            },
+          });
+          setPendingNavigation(null);
+        }
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData || "error adding the name");
+      }
+    } catch (err) {
+      alert("There is some problem while setting the name" || err);
+    }
+  };
+  const onSkip = () => {
+    setShowNameModal(false);
+    if (pendingNavigation) {
+      navigate(`/chat/${pendingNavigation.roomId}`, {
+        state: {
+          roomId: pendingNavigation.roomId,
+          socketId: pendingNavigation.socket,
+          userName: null
+        },
+      });
+      setPendingNavigation(null);
+    }
+  };
   const value = {
     joinSessionKey,
     socket,
     handleGenerateNewKey,
     handleInputChange,
     handleInputSessionKey,
+    showNameModal,
+    handleNewNameSubmit,
+    onSkip,
   };
 
   return (

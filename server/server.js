@@ -5,6 +5,7 @@ import  initializeSocket  from "./service-worker/socketService.js";
 import  connectDatabase  from "./config/database.js";
 import dotenv from "dotenv"
 import { createRoom, joinRoom } from "./controllers/roomController.js";
+import setName from './service-worker/setName.js';
 
 
 dotenv.config();
@@ -22,6 +23,7 @@ initializeSocket(server);
 
 app.post('/create-room', createRoom);
 app.post('/join-room', joinRoom);
+app.post('/set-name', setName);
 
 const PORT = process.env.PORT || 4001;
 server.listen(PORT, () => {

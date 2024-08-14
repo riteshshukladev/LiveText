@@ -7,7 +7,7 @@ const ChatPage = () => {
   console.log(socket);
 
   const location = useLocation();
-  const { roomId, socketId } = location.state;
+  const { roomId, socketId,userName } = location.state;
   const [msgIndividual, setMsgIndividual] = useState("");
   const [allMessages, setAllMessages] = useState({});
 
@@ -32,17 +32,18 @@ const ChatPage = () => {
     socket.on("recievedMessage", (data) => {
       setAllMessages((prev) => ({
         ...prev,
-        [data.senderId]: [data.Message],
+        [data.senderIdentity]: [data.message],
       }));
     });
   }, [socket]);
 
   const handleMsgChange = (e) => {
+    e.preventDefault();
     const { value } = e.target;
     setMsgIndividual(value);
-    if (socket && roomId && msgIndividual.trim()) {
+    if (socket && roomId) {  
       socket.emit("sendMessage", {
-        msgIndividual: msgIndividual,
+        msgIndividual: value,  
         roomId: roomId,
         socketId: socketId,
       });
@@ -54,6 +55,7 @@ const ChatPage = () => {
       <div className="socket_print bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-lg p-4 rounded-lg mb-4">
         <h1 className="text-xl font-semibold text-cyan-400">Socket ID: <span className="text-white">{socketId}</span></h1>
         <h2 className="text-lg text-gray-400">Room Key: <span className="font-medium text-cyan-400">{roomId}</span></h2>
+        {userName && <h2 className="text-xl font-semibold text-cyan-400">Name:<span className="text-white">{userName}</span></h2>}
       </div>
       <form className="mb-4">
         <input
@@ -65,9 +67,9 @@ const ChatPage = () => {
         />
       </form>
       <div className="space-y-2">
-        {Object.entries(allMessages).map(([senderId, msgs]) => (
-          <div key={senderId} className="bg-gray-800 bg-opacity-50 p-3 rounded-lg">
-            <p className="font-semibold text-cyan-400">{senderId}:</p>
+        {Object.entries(allMessages).map(([senderIdentity, msgs]) => (
+          <div key={senderIdentity} className="bg-gray-800 bg-opacity-50 p-3 rounded-lg">
+            <p className="font-semibold text-cyan-400">{senderIdentity}:</p>
             {msgs.map((m, index) => (
               <p key={index} className="text-gray-300 ml-4">{m}</p>
             ))}

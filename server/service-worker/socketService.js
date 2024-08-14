@@ -30,11 +30,27 @@ const initializeSocket = (server) => {
       }
     });
 
-    socket.on("sendMessage", ({ msgIndividual, roomId, socketId }) => {
-      io.to(roomId).emit("recievedMessage", {
-        senderId: socketId,
-        Message: msgIndividual,
-      });
+    socket.on("sendMessage", async ({ msgIndividual, roomId, socketId }) => {
+      // io.to(roomId).emit("recievedMessage", {
+      //   senderId: socketId,
+      //   Message: msgIndividual,
+      // });
+      try {
+        const room = await Room.findOne({ roomId });
+        if (room) {
+          const senderIdentity = room.names.get(socketId) || `${socketId}`
+          io.to(roomId).emit("recievedMessage", {
+            senderIdentity: senderIdentity,
+            message: msgIndividual,
+          });
+        } 
+        else {
+          console.log(`Room ${roomId} not found`);
+        }
+      }
+      catch (err) {
+        console.error(`error sending the messages: ${err}`);
+      }
     });
 
     socket.on("leaveRoom", async ({ roomId, socketId }) => {
@@ -49,6 +65,7 @@ const initializeSocket = (server) => {
             room.socketIdsJoined = room.socketIdsJoined.filter(
               (AllsocketIds) => AllsocketIds !== socketId
             );
+            room.names.delete(socketId)
             await room.save();
           }
         }

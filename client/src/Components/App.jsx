@@ -1,13 +1,15 @@
 
+import { useState } from "react";
 import { useSocket } from "../Context/SocketContext";
 import { Lock, Plus, LogIn } from 'lucide-react';
-
-
+import NameModal from "../Modal/NameModal";
 
 function App() {
 
 
   const socket = useSocket();
+
+  
 
   
   return (
@@ -48,6 +50,12 @@ function App() {
           </form>
         </div>
       </div>
+
+      {
+        socket.showNameModal && (
+          <NameModal/>
+        )
+      }
     </div>
   );
 }
