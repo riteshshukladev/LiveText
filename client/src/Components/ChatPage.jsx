@@ -57,7 +57,7 @@ const ChatPage = () => {
         <h2 className="text-lg text-gray-400">Room Key: <span className="font-medium text-cyan-400">{roomId}</span></h2>
         {userName && <h2 className="text-xl font-semibold text-cyan-400">Name:<span className="text-white">{userName}</span></h2>}
       </div>
-      <form className="mb-4">
+      <form className="mb-4" onSubmit={(e)=> e.preventDefault()}>
         <input
           type="text"
           onChange={handleMsgChange}
