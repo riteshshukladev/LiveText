@@ -34,7 +34,10 @@ const SocketContextAPI = ({ children }) => {
   const connectSocket = async () => {
     return new Promise((resolve) => {
       if (!socket) {
-        const newSocket = io(urlEndPoint);
+        const newSocket = io(urlEndPoint, {
+          transports: ["websocket"], // Force WebSocket as the only transport
+          upgrade: false,
+        });
 
         newSocket.on("connect", () => {
           setSocket(newSocket);
