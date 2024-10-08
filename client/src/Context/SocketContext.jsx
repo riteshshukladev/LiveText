@@ -37,6 +37,10 @@ const SocketContextAPI = ({ children }) => {
         const newSocket = io(urlEndPoint, {
           transports: ["websocket"], // Force WebSocket as the only transport
           upgrade: false,
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          reconnectionAttempts: 3,
         });
 
         newSocket.on("connect", () => {
@@ -133,7 +137,7 @@ const SocketContextAPI = ({ children }) => {
             state: {
               roomId: pendingNavigation.roomId,
               socketId: pendingNavigation.socket,
-              userName: name
+              userName: name,
             },
           });
           setPendingNavigation(null);
@@ -153,7 +157,7 @@ const SocketContextAPI = ({ children }) => {
         state: {
           roomId: pendingNavigation.roomId,
           socketId: pendingNavigation.socket,
-          userName: null
+          userName: null,
         },
       });
       setPendingNavigation(null);
