@@ -1,50 +1,43 @@
 import React, { useState } from "react";
 import { useSocket } from "../Context/SocketContext";
+import { X } from "lucide-react";
 
 const NameModal = () => {
+  const [name, setName] = useState("");
+  const { handleNewNameSubmit, onSkip } = useSocket();
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleNewNameSubmit(name);
+  };
 
-    const [name, setName] = useState("");
-    const {handleNewNameSubmit, onSkip} = useSocket();
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+  <div className="relative bg-white p-6 rounded-lg shadow-xl">
+    <button 
+      onClick=''  // You'll need to add this handler
+      className="absolute -top-2 -right-2 text-gray-400 hover:text-gray-600 bg-white rounded-full p-1 shadow-lg"
+    >
+      <X size={20} />
+    </button>
     
-
-    const handleSubmit = (e) => {
-        e.preventDefault(); // Prevent the default form submission
-        handleNewNameSubmit(name);
-      };
-
-
-    return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-      <div className="bg-gray-800 p-5 rounded-lg shadow-xl">
-        <h2 className="text-xl font-bold mb-4 text-white">Enter Your Name</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Give yourself a nickname or something"
-            className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
-          />
-          <div className="flex justify-between">
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Continue
-            </button>
-            <button
-              type="button"
-              onClick={onSkip}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Skip
-            </button>
-          </div>
-        </form>
-      </div>
+    <h2>Enter Your Name</h2>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Give yourself a nickname or something"
+      />
+    </form>
+    <div>
+      <button type="submit">Continue</button>
+      &nbsp;&nbsp;
+      <button type="button" onClick={onSkip}>Skip</button>
     </div>
-    )
-}
+  </div>
+</div>
+  );
+};
 
 export default NameModal;

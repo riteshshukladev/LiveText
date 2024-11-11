@@ -1,17 +1,17 @@
-
 import { useState } from "react";
 import { useSocket } from "../Context/SocketContext";
 import { Lock, Plus, LogIn } from 'lucide-react';
 import NameModal from "../Modal/NameModal";
 
 function App() {
-
-
   const socket = useSocket();
 
-  
+  // If showNameModal is true, render only the NameModal
+  if (socket.showNameModal) {
+    return <NameModal />;
+  }
 
-  
+  // Otherwise render the main UI
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-cyan-900 flex items-center justify-center p-4">
       <div className="bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-md border border-cyan-500/30">
@@ -50,12 +50,6 @@ function App() {
           </form>
         </div>
       </div>
-
-      {
-        socket.showNameModal && (
-          <NameModal/>
-        )
-      }
     </div>
   );
 }

@@ -21,8 +21,8 @@ connectDatabase();
 initializeSocket(server);
 
 
-app.post('/create-room', createRoom);
-app.post('/join-room', joinRoom);
+app.post('/chat/create-room', createRoom);
+app.post('/chat/join-room', joinRoom);
 app.post('/set-name', setName);
 
 const PORT = process.env.PORT || 4001;

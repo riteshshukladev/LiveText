@@ -61,7 +61,7 @@ const SocketContextAPI = ({ children }) => {
   const handleGenerateNewKey = async () => {
     const newSocket = await connectSocket();
     try {
-      const response = await fetch(`${urlEndPoint}/create-room`, {
+      const response = await fetch(`${urlEndPoint}/chat/create-room`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ socketId: newSocket.id }),
@@ -90,7 +90,7 @@ const SocketContextAPI = ({ children }) => {
     try {
       const newSocket = await connectSocket();
 
-      const response = await fetch(`${urlEndPoint}/join-room`, {
+      const response = await fetch(`${urlEndPoint}/chat/join-room`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
