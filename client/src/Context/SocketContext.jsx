@@ -172,6 +172,7 @@ const SocketContextAPI = ({ children }) => {
     showNameModal,
     handleNewNameSubmit,
     onSkip,
+    setShowNameModal
   };
 
   return (
