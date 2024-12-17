@@ -13,39 +13,44 @@ function App() {
   // Otherwise render the main UI
   return (
     <div class="screen">
-    <div class="base-background"></div>
-    <div class="background"></div>
+      <div class="base-background"></div>
+      <div class="background relative overflow-hidden"></div>
+
       
+      <div className="absolute bottom-0 w-full h-[40vh] wave-1" />
+      <div className="absolute bottom-0 w-full h-[30vh] wave-2" />
+      <div className="absolute bottom-0 w-full h-[20vh] wave-3" />
+      <div className="absolute bottom-0 w-full h-[10vh] wave-4" />
+
+      <div>
+        <h1>Live Text</h1>
+
         <div>
-          <h1>Live Text</h1>
+          <button onClick={socket.handleGenerateNewKey}>
+            <Plus size={20} />
+            <span>Create New Session</span>
+          </button>
 
-          <div>
-            <button onClick={socket.handleGenerateNewKey}>
-              <Plus size={20} />
-              <span>Create New Session</span>
+          <form onSubmit={socket.handleInputSessionKey}>
+            <div>
+              <input
+                type="text"
+                name="inpVal"
+                id="inpVal"
+                placeholder="Enter session key"
+                value={socket.joinSessionKey}
+                onChange={socket.handleInputChange}
+              />
+              <Lock size={20} />
+            </div>
+
+            <button type="submit">
+              <LogIn size={20} />
+              <span>Join Session</span>
             </button>
-
-            <form onSubmit={socket.handleInputSessionKey}>
-              <div>
-                <input
-                  type="text"
-                  name="inpVal"
-                  id="inpVal"
-                  placeholder="Enter session key"
-                  value={socket.joinSessionKey}
-                  onChange={socket.handleInputChange}
-                />
-                <Lock size={20} />
-              </div>
-
-              <button type="submit">
-                <LogIn size={20} />
-                <span>Join Session</span>
-              </button>
-            </form>
-          </div>
+          </form>
         </div>
-      
+      </div>
     </div>
   );
 }
