@@ -1,6 +1,7 @@
 import { useSocket } from "../../Context/SocketContext";
 import { Lock, Plus, LogIn } from "lucide-react";
 import NameModal from "../../Modal/NameModal";
+import { HashLoader } from "react-spinners";
 
 function LandingPage() {
   const socket = useSocket();
@@ -15,13 +16,22 @@ function LandingPage() {
 
       <div className="flex flex-col gap-4 items-center">
         {/* Create New Session Button */}
-        <button
-          onClick={socket.handleGenerateNewKey}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors duration-200 w-full sm:w-auto"
-        >
-          <Plus size={20} />
-          <span className="font-medium">Create New Session</span>
-        </button>
+        <div className="flex flex-col align-center justify-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={socket.handleGenerateNewKey}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors duration-200 w-full sm:w-auto"
+          >
+            {socket.loadingState.createSession ? (
+              <HashLoader
+                size={20}
+                color="#6366F1"
+                loading={socket.loadingState}
+              />
+            ) : (
+              <span className="font-medium">Create New Session</span>
+            )}
+          </button>
+        </div>
 
         {/* Join Session Form */}
         <form
@@ -50,8 +60,16 @@ function LandingPage() {
             type="submit"
             className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
           >
-            <LogIn size={20} />
-            <span className="font-medium">Join Session</span>
+            
+            {socket.loadingState.joinSession ? (
+              <HashLoader
+                size={20}
+                color="#6366F1"
+                loading={socket.loadingState}
+              />
+            ) : (
+              <span className="font-medium">Join Session</span>
+            )}
           </button>
         </form>
       </div>

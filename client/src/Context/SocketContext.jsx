@@ -1,4 +1,4 @@
-import { AwardIcon } from "lucide-react";
+
 import {
   useEffect,
   useState,
@@ -30,6 +30,10 @@ const SocketContextAPI = ({ children }) => {
   const roomIdRef = useRef(null);
   const socketIdRef = useRef(null);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [loadingState, setLoadingState] = useState({
+    createSession: false,
+    joinSession: false,
+  });
 
   const connectSocket = async () => {
     return new Promise((resolve) => {
@@ -60,6 +64,7 @@ const SocketContextAPI = ({ children }) => {
 
   const handleGenerateNewKey = async () => {
     const newSocket = await connectSocket();
+    setLoadingState((prevState) => ({...prevState, createSession: true}));
     try {
       const response = await fetch(`${urlEndPoint}/chat/create-room`, {
         method: "post",
@@ -70,12 +75,15 @@ const SocketContextAPI = ({ children }) => {
         const data = await response.json();
         roomIdRef.current = data.roomId;
         socketIdRef.current = newSocket.id;
+        setLoadingState((prevState) => ({...prevState, createSession: false}));
         setShowNameModal(true);
         setPendingNavigation({ roomId: data.roomId, socket: newSocket.id });
       } else {
+
         throw new Error("Room creation unsuccesfull");
       }
     } catch (err) {
+      setLoadingState((prevState) => ({...prevState, createSession: false}));
       alert(`Problem while creating the room: ${err}`);
     }
   };
@@ -84,11 +92,14 @@ const SocketContextAPI = ({ children }) => {
     setJoinSessionKey(e.target.value);
   };
 
+
   const handleInputSessionKey = async (e) => {
     e.preventDefault();
 
     try {
       const newSocket = await connectSocket();
+
+      setLoadingState((prevState) => ({...prevState, joinSession: true}));
 
       const response = await fetch(`${urlEndPoint}/chat/join-room`, {
         method: "post",
@@ -103,6 +114,7 @@ const SocketContextAPI = ({ children }) => {
         const data = await response.json();
         roomIdRef.current = data.roomId;
         socketIdRef.current = newSocket.id;
+        setLoadingState((prevState) => ({...prevState, joinSession: false}));
         setShowNameModal(true);
         // navigate(`/chat/${data.roomId}`, {
         //   state: { roomId: data.roomId, socketId: newSocket.id },
@@ -114,6 +126,7 @@ const SocketContextAPI = ({ children }) => {
       }
     } catch (err) {
       alert(`There was a problem while joining session ${err}`);
+      setLoadingState((prevState) =>({ ...prevState, joinSession: false}));
     }
   };
 
@@ -172,7 +185,8 @@ const SocketContextAPI = ({ children }) => {
     showNameModal,
     handleNewNameSubmit,
     onSkip,
-    setShowNameModal
+    setShowNameModal,
+    loadingState
   };
 
   return (
