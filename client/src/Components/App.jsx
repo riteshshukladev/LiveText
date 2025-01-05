@@ -13,9 +13,9 @@ function App() {
 
   // Otherwise render the main UI
   return (
-    <div class="screen">
-      <div class="base-background"></div>
-      <div class="background relative overflow-hidden"></div>
+    <div className="screen">
+      <div className="base-background"></div>
+      <div className="background relative overflow-hidden"></div>
 
       <div className="absolute bottom-0 w-full h-[25vh] wave-1" />
       <div className="absolute bottom-0 w-full h-[20vh] wave-2" />

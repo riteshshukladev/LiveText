@@ -35,56 +35,54 @@ const SocketContextAPI = ({ children }) => {
     joinSession: false,
   });
 
-  const connectSocket = async () => {
-    return new Promise((resolve) => {
-      if (!socket) {
-        const newSocket = io(urlEndPoint, {
-          transports: ["websocket"], // Force WebSocket as the only transport
-          upgrade: false,
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 3,
-        });
-
-        newSocket.on("connect", () => {
-          setSocket(newSocket);
-          resolve(newSocket);
-        });
-
-        newSocket.on("connect_error", (error) => {
-          console.error("Socket connection error:", error);
-          resolve(null);
-        });
-      } else {
-        resolve(socket);
-      }
+  useEffect(() => {
+    const newSocket = io(urlEndPoint, {
+      transports: ["websocket"], // Force WebSocket as the only transport
+      upgrade: false,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 3,
     });
-  };
+
+    newSocket.on("connect", () => {
+      setSocket(newSocket);
+    });
+
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    }
+  }, [urlEndPoint]);
 
   const handleGenerateNewKey = async () => {
-    const newSocket = await connectSocket();
+    if(!socket) return;
     setLoadingState((prevState) => ({...prevState, createSession: true}));
     try {
       const response = await fetch(`${urlEndPoint}/chat/create-room`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ socketId: newSocket.id }),
+        body: JSON.stringify({ socketId: socket.id }),
       });
       if (response.ok) {
         const data = await response.json();
         roomIdRef.current = data.roomId;
-        socketIdRef.current = newSocket.id;
+        socketIdRef.current = socket.id;
         setLoadingState((prevState) => ({...prevState, createSession: false}));
         setShowNameModal(true);
-        setPendingNavigation({ roomId: data.roomId, socket: newSocket.id });
+        setPendingNavigation({ roomId: data.roomId, socket: socket.id });
       } else {
 
         throw new Error("Room creation unsuccesfull");
       }
     } catch (err) {
-      setLoadingState((prevState) => ({...prevState, createSession: false}));
       alert(`Problem while creating the room: ${err}`);
+    }
+    finally {
+      setLoadingState((prevState) => ({...prevState, createSession: false}));
     }
   };
 
@@ -95,9 +93,10 @@ const SocketContextAPI = ({ children }) => {
 
   const handleInputSessionKey = async (e) => {
     e.preventDefault();
+    if (!socket) return;
 
     try {
-      const newSocket = await connectSocket();
+      
 
       setLoadingState((prevState) => ({...prevState, joinSession: true}));
 
@@ -106,27 +105,27 @@ const SocketContextAPI = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roomId: joinSessionKey,
-          socketId: newSocket.id,
+          socketId: socket.id,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
         roomIdRef.current = data.roomId;
-        socketIdRef.current = newSocket.id;
+        socketIdRef.current = socket.id;
         setLoadingState((prevState) => ({...prevState, joinSession: false}));
         setShowNameModal(true);
-        // navigate(`/chat/${data.roomId}`, {
-        //   state: { roomId: data.roomId, socketId: newSocket.id },
-        // });
-        setPendingNavigation({ roomId: data.roomId, socket: newSocket.id });
+        
+        setPendingNavigation({ roomId: data.roomId, socket: socket.id });
       } else {
         const errorData = await response.json();
         throw new Error(errorData || "error while joining the room");
       }
     } catch (err) {
       alert(`There was a problem while joining session ${err}`);
-      setLoadingState((prevState) =>({ ...prevState, joinSession: false}));
+    }
+    finally {
+      setLoadingState((prevState) => ({...prevState, joinSession: false}));
     }
   };
 

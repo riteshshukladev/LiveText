@@ -2,13 +2,10 @@ import { useSocket } from "../../Context/SocketContext";
 import { Lock, Plus, LogIn } from "lucide-react";
 import NameModal from "../../Modal/NameModal";
 import { HashLoader } from "react-spinners";
+import { useEffect } from "react";
 
 function LandingPage() {
   const socket = useSocket();
-
-  if (socket.showNameModal) {
-    return <NameModal />;
-  }
 
   return (
     <div className="flex flex-col items-center justify-center mt-20">
