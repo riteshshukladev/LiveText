@@ -34,6 +34,10 @@ const SocketContextAPI = ({ children }) => {
     createSession: false,
     joinSession: false,
   });
+  const [connectionState, setConnectionState] = useState({
+    connected: false,
+    error: false,
+  });
 
   useEffect(() => {
     const newSocket = io(urlEndPoint, {
@@ -46,10 +50,13 @@ const SocketContextAPI = ({ children }) => {
     });
 
     newSocket.on("connect", () => {
+      setConnectionState((prevState) => ({ ...prevState, connected: true }));
+      console.log("Socket connected");
       setSocket(newSocket);
     });
 
     newSocket.on("connect_error", (error) => {
+      setConnectionState((prevState) => ({ ...prevState, error: true }));
       console.error("Socket connection error:", error);
     });
 
@@ -185,7 +192,8 @@ const SocketContextAPI = ({ children }) => {
     handleNewNameSubmit,
     onSkip,
     setShowNameModal,
-    loadingState
+    loadingState,
+    connectionState,
   };
 
   return (
