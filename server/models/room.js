@@ -15,6 +15,10 @@ const roomSchema = new mongoose.Schema({
         of: String,
         default:new Map()
     },
+    roomKey: {
+        type: String,
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now,

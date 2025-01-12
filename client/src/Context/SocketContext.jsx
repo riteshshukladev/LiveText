@@ -1,14 +1,13 @@
-
 import {
   useEffect,
   useState,
-  useMemo,
   useContext,
   createContext,
   useRef,
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { generateAESKey, exportKey, importKey } from "../utils/crypto";
 
 const socketContext = createContext({
   joinSessionKey: "",
@@ -38,6 +37,7 @@ const SocketContextAPI = ({ children }) => {
     connected: false,
     error: false,
   });
+  const [roomKey, setRoomKey] = useState(null);
 
   useEffect(() => {
     const newSocket = io(urlEndPoint, {
@@ -55,6 +55,25 @@ const SocketContextAPI = ({ children }) => {
       setSocket(newSocket);
     });
 
+    newSocket.on("roomKey", async (keyData) => {
+      try {
+        const key = await importKey(keyData);
+        setRoomKey(key);
+      } catch (error) {
+        console.error("Error importing room key:", error);
+      }
+    });
+
+    newSocket.on("roomKeyUpdate", async (keyData) => {
+      try {
+        console.log("Received room key update");
+        const key = await importKey(keyData);
+        setRoomKey(key);
+      } catch (error) {
+        console.error("Error importing room key:", error);
+      }
+    });
+
     newSocket.on("connect_error", (error) => {
       setConnectionState((prevState) => ({ ...prevState, error: true }));
       console.error("Socket connection error:", error);
@@ -62,34 +81,40 @@ const SocketContextAPI = ({ children }) => {
 
     return () => {
       newSocket.disconnect();
-    }
+    };
   }, [urlEndPoint]);
 
   const handleGenerateNewKey = async () => {
-    if(!socket) return;
-    setLoadingState((prevState) => ({...prevState, createSession: true}));
+    if (!socket) return;
+    setLoadingState((prevState) => ({ ...prevState, createSession: true }));
     try {
+      const aesKey = await generateAESKey();
+      const exportedKey = await exportKey(aesKey);
+
       const response = await fetch(`${urlEndPoint}/chat/create-room`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ socketId: socket.id }),
+        body: JSON.stringify({
+          socketId: socket.id,
+          roomKey: exportedKey,
+        }),
       });
+
       if (response.ok) {
         const data = await response.json();
         roomIdRef.current = data.roomId;
         socketIdRef.current = socket.id;
-        setLoadingState((prevState) => ({...prevState, createSession: false}));
+        const key = await importKey(data.roomKey); 
+        setRoomKey(key); 
         setShowNameModal(true);
         setPendingNavigation({ roomId: data.roomId, socket: socket.id });
       } else {
-
-        throw new Error("Room creation unsuccesfull");
+        throw new Error("Room creation unsuccessful");
       }
     } catch (err) {
       alert(`Problem while creating the room: ${err}`);
-    }
-    finally {
-      setLoadingState((prevState) => ({...prevState, createSession: false}));
+    } finally {
+      setLoadingState((prevState) => ({ ...prevState, createSession: false }));
     }
   };
 
@@ -97,15 +122,12 @@ const SocketContextAPI = ({ children }) => {
     setJoinSessionKey(e.target.value);
   };
 
-
   const handleInputSessionKey = async (e) => {
     e.preventDefault();
     if (!socket) return;
 
     try {
-      
-
-      setLoadingState((prevState) => ({...prevState, joinSession: true}));
+      setLoadingState((prevState) => ({ ...prevState, joinSession: true }));
 
       const response = await fetch(`${urlEndPoint}/chat/join-room`, {
         method: "post",
@@ -120,9 +142,9 @@ const SocketContextAPI = ({ children }) => {
         const data = await response.json();
         roomIdRef.current = data.roomId;
         socketIdRef.current = socket.id;
-        setLoadingState((prevState) => ({...prevState, joinSession: false}));
+        setLoadingState((prevState) => ({ ...prevState, joinSession: false }));
         setShowNameModal(true);
-        
+
         setPendingNavigation({ roomId: data.roomId, socket: socket.id });
       } else {
         const errorData = await response.json();
@@ -130,9 +152,8 @@ const SocketContextAPI = ({ children }) => {
       }
     } catch (err) {
       alert(`There was a problem while joining session ${err}`);
-    }
-    finally {
-      setLoadingState((prevState) => ({...prevState, joinSession: false}));
+    } finally {
+      setLoadingState((prevState) => ({ ...prevState, joinSession: false }));
     }
   };
 
@@ -194,6 +215,7 @@ const SocketContextAPI = ({ children }) => {
     setShowNameModal,
     loadingState,
     connectionState,
+    roomKey,
   };
 
   return (
