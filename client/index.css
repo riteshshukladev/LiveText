@@ -24,52 +24,210 @@
   filter: contrast(100%) brightness(80%);
 }
 
+@keyframes waveEntrance {
+  0% {
+    transform: translateY(200%) scale(1.1);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
 .wave-1 {
+  position: fixed;
+  bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(164, 96, 83, 255),
-    rgba(138,72,63,255),
-    rgba(40,49,82,255)
+    rgb(134, 62, 52),
+    rgb(182, 74, 67),
+    rgb(54, 61, 99)
   );
+  background-size: 300% 300%;
   filter: blur(30px);
-  transform: scale(1.1);
-  opacity: 0.8;
+  transform: translateY(200%) scale(1.1);
+  opacity: 0;
+  animation: 
+    waveEntrance 1.2s ease-out forwards,
+    wave1-animation 15s ease-in-out infinite;
+  animation-delay: 0s, 1.5s;
+  will-change: transform, opacity, background-position;
 }
 
 .wave-2 {
+  position: fixed;
+  bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(108, 92, 231, 0.9),
-    rgba(168, 230, 207, 0.9),
-    rgba(255, 140, 148, 0.9)
+    rgb(103, 95, 86),
+    rgb(122, 88, 66),
+    rgb(141, 76, 56)
   );
+  background-size: 300% 300%;
   filter: blur(30px);
-  transform: scale(1.1);
-  opacity: 0.8;
+  transform: translateY(200%) scale(1.1);
+  opacity: 0;
+  animation: 
+    waveEntrance 1.2s ease-out forwards,
+    wave2-animation 18s ease-in-out infinite;
+  animation-delay: 0.2s, 1.7s;
+  will-change: transform, opacity, background-position;
 }
 
 .wave-3 {
+  position: fixed;
+  bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(255, 140, 148, 0.9),
-    rgba(45, 52, 54, 0.9),
-    rgba(0, 184, 148, 0.9)
+    rgb(58, 65, 112),
+    rgb(103, 112, 159),
+    rgb(69, 91, 157)
   );
+  background-size: 300% 300%;
   filter: blur(30px);
-  transform: scale(1.1);
-  opacity: 0.8;
+  transform: translateY(200%) scale(1.1);
+  opacity: 0;
+  animation: 
+    waveEntrance 1.2s ease-out forwards,
+    wave3-animation 20s ease-in-out infinite;
+  animation-delay: 0.4s, 1.9s;
+  will-change: transform, opacity, background-position;
 }
 
 .wave-4 {
+  position: fixed;
+  bottom: 0;
   background: linear-gradient(
     135deg,
     rgba(0, 184, 148, 0.9),
     rgba(108, 92, 231, 0.9),
     rgba(78, 205, 196, 0.9)
   );
+  background-size: 300% 300%;
   filter: blur(30px);
-  transform: scale(1.1);
-  opacity: 0.8;
+  transform: translateY(200%) scale(1.1);
+  opacity: 0;
+  animation: 
+    waveEntrance 1.2s ease-out forwards,
+    wave4-animation 14s ease-in-out infinite;
+  animation-delay: 0.6s, 2.1s;
+  will-change: transform, opacity, background-position;
+}
+
+/* Loading state animations */
+.wave-1.loading {
+  animation: loading-wave1 2s ease-in-out infinite;
+  opacity: 0.9;
+  background-size: 200% 200%;
+  transform: translateY(0) scale(1.1) !important;
+}
+
+.wave-2.loading {
+  animation: loading-wave2 2.5s ease-in-out infinite;
+  opacity: 0.9;
+  background-size: 200% 200%;
+  transform: translateY(0) scale(1.1) !important;
+}
+
+.wave-3.loading {
+  animation: loading-wave3 3s ease-in-out infinite;
+  opacity: 0.9;
+  background-size: 200% 200%;
+  transform: translateY(0) scale(1.1) !important;
+}
+
+.wave-4.loading {
+  animation: loading-wave4 3.5s ease-in-out infinite;
+  opacity: 0.9;
+  background-size: 200% 200%;
+  transform: translateY(0) scale(1.1) !important;
+}
+
+/* Normal wave animations */
+@keyframes wave1-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes wave2-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes wave3-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes wave4-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Loading animations */
+@keyframes loading-wave1 {
+  0% {
+    background-position: 0% 50%;
+    filter: blur(25px);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: blur(30px);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: blur(25px);
+  }
+}
+
+@keyframes loading-wave2 {
+  0% {
+    background-position: 100% 50%;
+    filter: blur(25px);
+  }
+  50% {
+    background-position: 0% 50%;
+    filter: blur(30px);
+  }
+  100% {
+    background-position: 100% 50%;
+    filter: blur(25px);
+  }
+}
+
+@keyframes loading-wave3 {
+  0% {
+    background-position: 0% 50%;
+    filter: blur(25px);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: blur(30px);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: blur(25px);
+  }
+}
+
+@keyframes loading-wave4 {
+  0% {
+    background-position: 100% 50%;
+    filter: blur(25px);
+  }
+  50% {
+    background-position: 0% 50%;
+    filter: blur(30px);
+  }
+  100% {
+    background-position: 100% 50%;
+    filter: blur(25px);
+  }
 }
 
 .base-background {
@@ -82,7 +240,6 @@
   z-index: -111;
 }
 
-/* Container for your content */
 .content {
   position: relative;
   z-index: 2;
@@ -90,6 +247,9 @@
   height: 100%;
 }
 
+/* Rest of your existing CSS including font-face declarations */
+
+/* Update the fast animations to only affect the color flow */
 /* comfortaa-latin-300-normal */
 @font-face {
   font-family: "Comfortaa";

@@ -1,14 +1,13 @@
-
 import {
   useEffect,
   useState,
-  useMemo,
   useContext,
   createContext,
   useRef,
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { generateAESKey, exportKey, importKey } from "../utils/crypto";
 
 const socketContext = createContext({
   joinSessionKey: "",
@@ -34,57 +33,88 @@ const SocketContextAPI = ({ children }) => {
     createSession: false,
     joinSession: false,
   });
+  const [connectionState, setConnectionState] = useState({
+    connected: false,
+    error: false,
+  });
+  const [roomKey, setRoomKey] = useState(null);
 
-  const connectSocket = async () => {
-    return new Promise((resolve) => {
-      if (!socket) {
-        const newSocket = io(urlEndPoint, {
-          transports: ["websocket"], // Force WebSocket as the only transport
-          upgrade: false,
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 3,
-        });
+  useEffect(() => {
+    const newSocket = io(urlEndPoint, {
+      transports: ["websocket"], // Force WebSocket as the only transport
+      upgrade: false,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 3,
+    });
 
-        newSocket.on("connect", () => {
-          setSocket(newSocket);
-          resolve(newSocket);
-        });
+    newSocket.on("connect", () => {
+      setConnectionState((prevState) => ({ ...prevState, connected: true }));
+      console.log("Socket connected");
+      setSocket(newSocket);
+    });
 
-        newSocket.on("connect_error", (error) => {
-          console.error("Socket connection error:", error);
-          resolve(null);
-        });
-      } else {
-        resolve(socket);
+    newSocket.on("roomKey", async (keyData) => {
+      try {
+        const key = await importKey(keyData);
+        setRoomKey(key);
+      } catch (error) {
+        console.error("Error importing room key:", error);
       }
     });
-  };
+
+    newSocket.on("roomKeyUpdate", async (keyData) => {
+      try {
+        console.log("Received room key update");
+        const key = await importKey(keyData);
+        setRoomKey(key);
+      } catch (error) {
+        console.error("Error importing room key:", error);
+      }
+    });
+
+    newSocket.on("connect_error", (error) => {
+      setConnectionState((prevState) => ({ ...prevState, error: true }));
+      console.error("Socket connection error:", error);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [urlEndPoint]);
 
   const handleGenerateNewKey = async () => {
-    const newSocket = await connectSocket();
-    setLoadingState((prevState) => ({...prevState, createSession: true}));
+    if (!socket) return;
+    setLoadingState((prevState) => ({ ...prevState, createSession: true }));
     try {
+      const aesKey = await generateAESKey();
+      const exportedKey = await exportKey(aesKey);
+
       const response = await fetch(`${urlEndPoint}/chat/create-room`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ socketId: newSocket.id }),
+        body: JSON.stringify({
+          socketId: socket.id,
+          roomKey: exportedKey,
+        }),
       });
+
       if (response.ok) {
         const data = await response.json();
         roomIdRef.current = data.roomId;
-        socketIdRef.current = newSocket.id;
-        setLoadingState((prevState) => ({...prevState, createSession: false}));
+        socketIdRef.current = socket.id;
+        const key = await importKey(data.roomKey); 
+        setRoomKey(key); 
         setShowNameModal(true);
-        setPendingNavigation({ roomId: data.roomId, socket: newSocket.id });
+        setPendingNavigation({ roomId: data.roomId, socket: socket.id });
       } else {
-
-        throw new Error("Room creation unsuccesfull");
+        throw new Error("Room creation unsuccessful");
       }
     } catch (err) {
-      setLoadingState((prevState) => ({...prevState, createSession: false}));
       alert(`Problem while creating the room: ${err}`);
+    } finally {
+      setLoadingState((prevState) => ({ ...prevState, createSession: false }));
     }
   };
 
@@ -92,41 +122,38 @@ const SocketContextAPI = ({ children }) => {
     setJoinSessionKey(e.target.value);
   };
 
-
   const handleInputSessionKey = async (e) => {
     e.preventDefault();
+    if (!socket) return;
 
     try {
-      const newSocket = await connectSocket();
-
-      setLoadingState((prevState) => ({...prevState, joinSession: true}));
+      setLoadingState((prevState) => ({ ...prevState, joinSession: true }));
 
       const response = await fetch(`${urlEndPoint}/chat/join-room`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roomId: joinSessionKey,
-          socketId: newSocket.id,
+          socketId: socket.id,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
         roomIdRef.current = data.roomId;
-        socketIdRef.current = newSocket.id;
-        setLoadingState((prevState) => ({...prevState, joinSession: false}));
+        socketIdRef.current = socket.id;
+        setLoadingState((prevState) => ({ ...prevState, joinSession: false }));
         setShowNameModal(true);
-        // navigate(`/chat/${data.roomId}`, {
-        //   state: { roomId: data.roomId, socketId: newSocket.id },
-        // });
-        setPendingNavigation({ roomId: data.roomId, socket: newSocket.id });
+
+        setPendingNavigation({ roomId: data.roomId, socket: socket.id });
       } else {
         const errorData = await response.json();
         throw new Error(errorData || "error while joining the room");
       }
     } catch (err) {
       alert(`There was a problem while joining session ${err}`);
-      setLoadingState((prevState) =>({ ...prevState, joinSession: false}));
+    } finally {
+      setLoadingState((prevState) => ({ ...prevState, joinSession: false }));
     }
   };
 
@@ -186,7 +213,9 @@ const SocketContextAPI = ({ children }) => {
     handleNewNameSubmit,
     onSkip,
     setShowNameModal,
-    loadingState
+    loadingState,
+    connectionState,
+    roomKey,
   };
 
   return (

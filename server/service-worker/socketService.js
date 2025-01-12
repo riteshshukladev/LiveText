@@ -1,7 +1,8 @@
 import { Server } from "socket.io";
 import Room from "../models/room.js";
+// import { encryptMessage, decryptMessage } from "../utils/encryptionUtils.js";
 
-let io;
+let io; 
 
 const initializeSocket = (server) => {
   io = new Server(server, {
@@ -23,6 +24,10 @@ const initializeSocket = (server) => {
             await room.save();
           }
           socket.join(roomId);
+
+          const roomKeyBuffer = Buffer.from(room.roomKey, "hex");
+          socket.emit("roomKeyUpdate", Array.from(roomKeyBuffer));
+
           console.log(`socketId ${socket.id} has joined the room`);
         }
       } catch (err) {
@@ -30,34 +35,27 @@ const initializeSocket = (server) => {
       }
     });
 
-    socket.on("sendMessage", async ({ msgIndividual, roomId, socketId }) => {
-      // io.to(roomId).emit("recievedMessage", {
-      //   senderId: socketId,
-      //   Message: msgIndividual,
-      // });
+    socket.on("sendMessage", async ({ message, roomId, socketId }) => {
       try {
         const room = await Room.findOne({ roomId });
         if (room) {
-          const senderIdentity = room.names.get(socketId) || `${socketId}`
+          const senderIdentity = room.names.get(socketId) || `${socketId}`;
+          const key = Buffer.from(room.roomKey, "hex");
+
+
           io.to(roomId).emit("recievedMessage", {
-            senderIdentity: senderIdentity,
-            message: msgIndividual,
+            senderIdentity,
+            message,
           });
-        } 
-        else {
-          console.log(`Room ${roomId} not found`);
         }
-      }
-      catch (err) {
-        console.error(`error sending the messages: ${err}`);
+      } catch (err) {
+        console.error(`Error sending the messages:`, err);
       }
     });
 
     socket.on("leaveRoom", async ({ roomId, socketId }) => {
       try {
-        const room = await Room.findOne({
-          roomId,
-        });
+        const room = await Room.findOne({ roomId });
         if (room && room.socketIdsJoined.includes(socketId)) {
           if (room.socketIdsJoined.length === 1) {
             await Room.findOneAndDelete({ roomId });
@@ -65,7 +63,7 @@ const initializeSocket = (server) => {
             room.socketIdsJoined = room.socketIdsJoined.filter(
               (AllsocketIds) => AllsocketIds !== socketId
             );
-            room.names.delete(socketId)
+            room.names.delete(socketId);
             await room.save();
           }
         }
@@ -80,11 +78,9 @@ const initializeSocket = (server) => {
         );
       }
     });
-    // socket.on("disconnect", async () => {
-
-    //   console.log(`user disconnected successfully`);
-    // });
   });
+
+  return io;
 };
 
 export default initializeSocket;

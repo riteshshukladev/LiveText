@@ -1,28 +1,31 @@
 import Room from "../models/room.js";
 import generateRoomId from "../utils/KeyGenerator.js";
+import { generateRoomKey } from "../utils/encryptionUtils.js";
 
 const createRoom = async (req, res) => {
-  const { socketId } = req.body;
-  console.log(
-    `this is the socketId sended from client with the roomId being ${socketId}`
-  );
+  const { socketId, roomKey } = req.body;
   try {
     const roomId = generateRoomId();
-    const room = new Room({ roomId });
+    const room = new Room({
+      roomId,
+      roomKey: Buffer.from(roomKey).toString("hex"), 
+    });
+
     room.socketIdsJoined.push(socketId);
     await room.save();
-    res.json({ roomId });
+
+    res.json({
+      roomId,
+      roomKey, 
+    });
   } catch (error) {
+    console.error("Error creating room:", error);
     res.status(500).json({ error: "Error creating room" });
   }
 };
 
 const joinRoom = async (req, res) => {
   const { roomId, socketId } = req.body;
-  console.log(
-    `this is the socketId sended from client ${socketId} with roomId ${roomId}`
-  );
-
   try {
     const room = await Room.findOne({ roomId });
     if (room) {
@@ -30,11 +33,18 @@ const joinRoom = async (req, res) => {
         room.socketIdsJoined.push(socketId);
         await room.save();
       }
-      res.json({ roomId });
+
+      const roomKeyBuffer = Buffer.from(room.roomKey, "hex");
+
+      res.json({
+        roomId,
+        roomKey: Array.from(roomKeyBuffer),
+      });
     } else {
       res.status(404).json({ error: "Room not found" });
     }
   } catch (err) {
+    console.error("Error joining room:", err);
     res.status(500).json({ error: "Error while joining the room" });
   }
 };
