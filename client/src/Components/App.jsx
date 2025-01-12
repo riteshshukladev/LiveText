@@ -7,6 +7,7 @@ import LandingPage from "./landing-page/LandingPage";
 function App() {
   const socket = useSocket();
   const [isHovered, setIsHovered] = useState(false);
+  const { loadingState } = useSocket();
 
   useEffect(() => {
     if (!socket.connectionState.connected || socket.connectionState.error) {
@@ -15,6 +16,8 @@ function App() {
       setIsHovered(false);
     }
   }, [socket.connectionState.connected, socket.connectionState.error]);
+
+  const isLoading = loadingState.createSession || loadingState.joinSession;
 
   if (socket.showNameModal) {
     return <NameModal />;
@@ -42,10 +45,26 @@ function App() {
       <div className="base-background"></div>
       <div className="background relative overflow-hidden"></div>
 
-      <div className="absolute bottom-0 w-full h-[25vh] wave-1" />
-      <div className="absolute bottom-0 w-full h-[20vh] wave-2" />
-      <div className="absolute bottom-0 w-full h-[15vh] wave-3" />
-      <div className="absolute bottom-0 w-full h-[7vh] wave-4" />
+      <div
+        className={`absolute bottom-0 w-full h-[25vh] wave-1 ${
+          isLoading ? "loading" : ""
+        }`}
+      />
+      <div
+        className={`absolute bottom-0 w-full h-[20vh] wave-2 ${
+          isLoading ? "loading" : ""
+        }`}
+      />
+      <div
+        className={`absolute bottom-0 w-full h-[15vh] wave-3 ${
+          isLoading ? "loading" : ""
+        }`}
+      />
+      <div
+        className={`absolute bottom-0 w-full h-[7vh] wave-4 ${
+          isLoading ? "loading" : ""
+        }`}
+      />
       <LandingPage />
     </div>
   );
