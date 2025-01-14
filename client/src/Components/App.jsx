@@ -3,6 +3,7 @@ import { useSocket } from "../Context/SocketContext";
 import { Lock, Plus, LogIn } from "lucide-react";
 import NameModal from "../Modal/NameModal";
 import LandingPage from "./landing-page/LandingPage";
+import liveTextLogo from "../assets/logo/live-text-logo-4.svg";
 
 function App() {
   const socket = useSocket();
@@ -65,6 +66,15 @@ function App() {
           isLoading ? "loading" : ""
         }`}
       />
+
+      {/* Icon logo */}
+
+      <img
+        className="text-white font-comfortaa font-medium max-w-[110px] absolute top-[2%] left-[2%]"
+        src={liveTextLogo}
+        alt="logo"
+      ></img>
+
       <LandingPage />
     </div>
   );
