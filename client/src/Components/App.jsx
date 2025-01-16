@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSocket } from "../Context/SocketContext";
-import { Lock, Plus, LogIn } from "lucide-react";
 import NameModal from "../Modal/NameModal";
 import LandingPage from "./landing-page/LandingPage";
+import Background from "./layout/Background";
 import liveTextLogo from "../assets/logo/live-text-logo-4.svg";
+import ErrorModal from "../Modal/ErrorModal";
 
 function App() {
   const socket = useSocket();
   const [isHovered, setIsHovered] = useState(false);
-  const { loadingState } = useSocket();
+  const { loadingState, error, clearError } = useSocket();
 
   useEffect(() => {
     if (!socket.connectionState.connected || socket.connectionState.error) {
@@ -20,12 +21,12 @@ function App() {
 
   const isLoading = loadingState.createSession || loadingState.joinSession;
 
-  if (socket.showNameModal) {
-    return <NameModal />;
-  }
-  // Otherwise render the main UI
   return (
-    <div className="screen relative">
+    <Background isLoading={isLoading}>
+      {error && <ErrorModal error={error} clearError={clearError} />}
+
+      
+      {/* Network connection indicator */}
       <span
         className={
           socket.connectionState.connected
@@ -43,40 +44,17 @@ function App() {
           </div>
         )}
       </span>
-      <div className="base-background"></div>
-      <div className="background relative overflow-hidden"></div>
 
-      <div
-        className={`absolute bottom-0 w-full h-[25vh] wave-1 ${
-          isLoading ? "loading" : ""
-        }`}
-      />
-      <div
-        className={`absolute bottom-0 w-full h-[20vh] wave-2 ${
-          isLoading ? "loading" : ""
-        }`}
-      />
-      <div
-        className={`absolute bottom-0 w-full h-[15vh] wave-3 ${
-          isLoading ? "loading" : ""
-        }`}
-      />
-      <div
-        className={`absolute bottom-0 w-full h-[7vh] wave-4 ${
-          isLoading ? "loading" : ""
-        }`}
-      />
-
-      {/* Icon logo */}
+      {/* logo */}
 
       <img
-        className="text-white font-comfortaa font-medium max-w-[110px] absolute top-[2%] left-[2%]"
+        className="text-white font-comfortaa font-medium max-w-[110px] absolute top-4	 left-[2%]"
         src={liveTextLogo}
         alt="logo"
-      ></img>
+      />
 
-      <LandingPage />
-    </div>
+      {socket.showNameModal ? <NameModal /> : <LandingPage />}
+    </Background>
   );
 }
 

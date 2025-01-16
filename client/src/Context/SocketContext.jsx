@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useState,
-  useContext,
-  createContext,
-  useRef,
-} from "react";
+import { useEffect, useState, useContext, createContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { generateAESKey, exportKey, importKey } from "../utils/crypto";
@@ -38,6 +32,12 @@ const SocketContextAPI = ({ children }) => {
     error: false,
   });
   const [roomKey, setRoomKey] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleError = ({ title, message }) => {
+    setError({ title, message });
+    // setTimeout(() => setError(null), 5000);
+  };
 
   useEffect(() => {
     const newSocket = io(urlEndPoint, {
@@ -76,7 +76,13 @@ const SocketContextAPI = ({ children }) => {
 
     newSocket.on("connect_error", (error) => {
       setConnectionState((prevState) => ({ ...prevState, error: true }));
-      console.error("Socket connection error:", error);
+      {
+        connectionState.connected &&
+          handleError({
+            title: "Connection Error",
+            message: "There was an error connecting to the server",
+          });
+      }
     });
 
     return () => {
@@ -104,15 +110,19 @@ const SocketContextAPI = ({ children }) => {
         const data = await response.json();
         roomIdRef.current = data.roomId;
         socketIdRef.current = socket.id;
-        const key = await importKey(data.roomKey); 
-        setRoomKey(key); 
+        const key = await importKey(data.roomKey);
+        setRoomKey(key);
         setShowNameModal(true);
         setPendingNavigation({ roomId: data.roomId, socket: socket.id });
       } else {
-        throw new Error("Room creation unsuccessful");
+        const errorData = await response.json();
+        throw new Error(errorData || "Room creation unsuccessful");
       }
     } catch (err) {
-      alert(`Problem while creating the room: ${err}`);
+      handleError({
+        title: "Room Creation Error",
+        message: "There was an error creating the room",
+      });
     } finally {
       setLoadingState((prevState) => ({ ...prevState, createSession: false }));
     }
@@ -151,7 +161,10 @@ const SocketContextAPI = ({ children }) => {
         throw new Error(errorData || "error while joining the room");
       }
     } catch (err) {
-      alert(`There was a problem while joining session ${err}`);
+      handleError({
+        title: "Join Session Error",
+        message: "There was an error joining the session",
+      });
     } finally {
       setLoadingState((prevState) => ({ ...prevState, joinSession: false }));
     }
@@ -187,7 +200,11 @@ const SocketContextAPI = ({ children }) => {
         throw new Error(errorData || "error adding the name");
       }
     } catch (err) {
-      alert("There is some problem while setting the name" || err);
+      handleError({
+        title: "Name Submission Error",
+        message: "There was an error submitting the name",
+      });
+      setShowNameModal(false);
     }
   };
   const onSkip = () => {
@@ -216,6 +233,8 @@ const SocketContextAPI = ({ children }) => {
     loadingState,
     connectionState,
     roomKey,
+    error,
+    clearError: () => setError(null),
   };
 
   return (

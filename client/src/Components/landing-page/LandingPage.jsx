@@ -10,12 +10,12 @@ function LandingPage() {
   const socket = useSocket();
 
   return (
-    <div className="flex flex-col items-center justify-center mt-20">
+    <div className="flex flex-col items-center justify-center">
       {/* <h1 className="text-white font-comfortaa font-medium">Live Text</h1> */}
       {/* <img className="text-white font-comfortaa font-medium max-w-[110px]" src={liveTextLogo} alt="logo"></img> */}
 
 
-      <div className="flex flex-col gap-2 items-center">
+      <div className="flex flex-col gap-2 items-center mt-24">
         {/* Create New Session Button */}
         <div className="flex flex-col align-center justify-center gap-2 w-full sm:w-auto">
           <button
