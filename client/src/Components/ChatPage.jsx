@@ -15,6 +15,9 @@ const ChatPage = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
+
+
+
     if (socket) {
       socket.emit("joinRoom", { roomId, socketId });
 
@@ -126,9 +129,8 @@ const ChatPage = () => {
         />
         
 
-        <div className="flex flex-col h-[calc(100vh-88px)]">
+        <div className="flex flex-col h-[calc(100vh-110px)] md:h-[calc(100vh-88px)]">
           {" "}
-          {/* 88px is header height */}
           <div className="flex-grow overflow-y-auto px-12 py-6">
             <div className="flex flex-col gap-2">
               {Object.entries(allMessages).map(([senderIdentity, msgs]) => (
@@ -152,7 +154,7 @@ const ChatPage = () => {
             </div>
           </div>
           {/* Input fixed at bottom */}
-          <div className="pb-4 px-8">
+          <div className="pb-4 px-4 md:px-8">
             <input
               type="text"
               onChange={handleInputChange}

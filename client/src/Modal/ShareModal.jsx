@@ -1,5 +1,5 @@
 import React from "react";
-import { X } from "lucide-react";
+import { X, Copy } from "lucide-react";
 import {
   TwitterShareButton,
   WhatsappShareButton,
@@ -29,7 +29,6 @@ const ShareModal = ({ roomId, onClose }) => {
         className="relative z-50 bg-[#0D0D0D] border border-[#151515] rounded-xl p-6 w-80"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute -top-2 -right-2 text-gray-400 hover:text-gray-600 bg-white rounded-full p-1 shadow-lg"
@@ -42,34 +41,46 @@ const ShareModal = ({ roomId, onClose }) => {
         </h3>
 
         <div className="flex flex-col gap-4">
-          {/* Room Key Display */}
-          <div className="bg-[#151515] p-3 rounded-lg">
-            <p className="text-white/70 text-sm font-comfortaa text-center select-all">
+          {/* Room Key Display with Copy Icon */}
+          <div className="bg-[#151515] p-3 rounded-lg flex items-center justify-between group">
+            <p className="text-white/70 text-sm font-comfortaa text-center select-all flex-1">
               {roomId}
             </p>
+            <button
+              onClick={handleCopyKey}
+              className="ml-2 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <Copy size={16} className="text-white/70" />
+            </button>
           </div>
-
-          {/* Copy Button */}
-          <button
-            onClick={handleCopyKey}
-            className="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-comfortaa"
-          >
-            Copy Key
-          </button>
 
           {/* Social Share Buttons */}
           <div className="flex justify-center gap-4 mt-2">
-            <WhatsappShareButton url="" title={shareMessage}
-            url = {`www.webwhatsapp.com`}
+            <WhatsappShareButton
+              title={shareMessage}
+              url={`www.whatsapp.com`}
+              className="hover:opacity-80 transition-opacity"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <WhatsappIcon size={32} round />
             </WhatsappShareButton>
 
-            <TelegramShareButton url="" title={shareMessage}>
+            <TelegramShareButton
+              url=""
+              title={shareMessage}
+              className="hover:opacity-80 transition-opacity"
+            >
               <TelegramIcon size={32} round />
             </TelegramShareButton>
 
-            <TwitterShareButton url="" title={shareMessage}>
+            <TwitterShareButton
+              url={`x.com`}
+              title={shareMessage}
+              className="hover:opacity-80 transition-opacity"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <TwitterIcon size={32} round />
             </TwitterShareButton>
           </div>

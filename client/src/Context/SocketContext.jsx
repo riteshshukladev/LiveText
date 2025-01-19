@@ -82,6 +82,21 @@ const SocketContextAPI = ({ children }) => {
             title: "Connection Error",
             message: "There was an error connecting to the server",
           });
+        if (window.location.pathname.includes("/chat")) {
+          navigate("/");
+        }
+      }
+    });
+
+    newSocket.on("disconnect", () => {
+      setConnectionState((prevState) => ({ ...prevState, connected: false }));
+      handleError({
+        title: "Connection Lost",
+        message: "Connection to server was lost. Please rejoin the chat.",
+      });
+      // Navigate to home if on chat page
+      if (window.location.pathname.includes("/chat")) {
+        navigate("/");
       }
     });
 
@@ -234,6 +249,7 @@ const SocketContextAPI = ({ children }) => {
     connectionState,
     roomKey,
     error,
+    setError,
     clearError: () => setError(null),
   };
 

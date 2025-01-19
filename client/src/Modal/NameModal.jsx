@@ -37,7 +37,7 @@ const NameModal = () => {
     >
       <div className="absolute inset-0 bg-opacity-10 backdrop-blur-sm"></div>
       <div
-        className="relative z-50 flex flex-col gap-4 lg:py-56 px-8 text-white border border-solid border-white rounded-2xl bg-black bg-opacity-30 backdrop-blur-sm"
+        className="relative z-50 flex flex-col gap-4 py-56 px-8 text-white border border-solid border-white rounded-2xl bg-black bg-opacity-30 backdrop-blur-sm"
         onClick={handleModalClick}
       >
         <button

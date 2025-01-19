@@ -3,21 +3,15 @@ import { Lock, Plus, LogIn } from "lucide-react";
 import NameModal from "../../Modal/NameModal";
 import { HashLoader } from "react-spinners";
 import { useEffect } from "react";
-// import liveTextLogo from "../../assets/logo/live-text-logo-2.svg";
-
 
 function LandingPage() {
   const socket = useSocket();
 
   return (
     <div className="flex flex-col items-center justify-center">
-      {/* <h1 className="text-white font-comfortaa font-medium">Live Text</h1> */}
-      {/* <img className="text-white font-comfortaa font-medium max-w-[110px]" src={liveTextLogo} alt="logo"></img> */}
-
-
       <div className="flex flex-col gap-2 items-center mt-24">
         {/* Create New Session Button */}
-        <div className="flex flex-col align-center justify-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col align-center justify-center gap-2 w-auto">
           <button
             onClick={socket.handleGenerateNewKey}
             className="flex items-center gap-2 w-fit text-white font-extralight font-comfortaa pb-px border-b border-white"
@@ -38,7 +32,7 @@ function LandingPage() {
         <span className="text-white"> or </span>
         <form
           onSubmit={socket.handleInputSessionKey}
-          className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto"
+          className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center sm:items-end"
         >
           {/* Input Container */}
           <div className="relative flex-1">
@@ -62,7 +56,6 @@ function LandingPage() {
             type="submit"
             className="flex items-center gap-2 w-fit text-white font-extralight font-comfortaa pb-px border-b border-white"
           >
-            
             {socket.loadingState.joinSession ? (
               <HashLoader
                 size={20}
@@ -70,7 +63,7 @@ function LandingPage() {
                 loading={socket.loadingState}
               />
             ) : (
-              <span className="font-medium">Join Chat</span>
+              <span className="font-medium pb-1.5">Join Chat</span>
             )}
           </button>
         </form>
