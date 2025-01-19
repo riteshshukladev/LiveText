@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useSocket } from "../Context/SocketContext";
 import { encryptMessage, decryptMessage } from "../utils/crypto";
+import ChatBackground from "./layout/ChatBackground";
+import ChatHeader from "./ChatHeader";
 
 const ChatPage = () => {
   const { socket, roomKey } = useSocket();
@@ -9,10 +11,22 @@ const ChatPage = () => {
   const { roomId, socketId, userName } = location.state;
   const [msgIndividual, setMsgIndividual] = useState("");
   const [allMessages, setAllMessages] = useState({});
+  const [usersList, setUsersList] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
+
+
+
     if (socket) {
       socket.emit("joinRoom", { roomId, socketId });
+
+      const handleRoomUsers = ({ users }) => {
+        console.log("Received users:", users);
+        setUsersList(users);
+      };
+
+      socket.on("roomUsers", handleRoomUsers);
 
       const handleBeforeUnload = () => {
         socket.emit("leaveRoom", { roomId, socketId });
@@ -23,9 +37,21 @@ const ChatPage = () => {
       return () => {
         socket.emit("leaveRoom", { roomId, socketId });
         window.removeEventListener("beforeunload", handleBeforeUnload);
+        socket.off("roomUsers", handleRoomUsers);
       };
     }
   }, [socket, roomId, socketId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".relative userlists")) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!socket || !roomKey) {
@@ -34,7 +60,6 @@ const ChatPage = () => {
 
     const handleReceivedMessage = async (data) => {
       try {
-
         console.log(data);
 
         const decryptedMessage = await decryptMessage(data.message, roomKey);
@@ -42,9 +67,8 @@ const ChatPage = () => {
           ...prev,
           [data.senderIdentity]: [decryptedMessage],
         }));
-         
       } catch (error) {
-        console.error('❌ Error processing message:', error);
+        console.error("❌ Error processing message:", error);
       }
     };
 
@@ -61,10 +85,10 @@ const ChatPage = () => {
     setMsgIndividual(value);
 
     if (!socket || !roomKey || !value.trim()) {
-      console.log('⚠️ Cannot send message:', { 
-        socketAvailable: !!socket, 
-        keyAvailable: !!roomKey, 
-        messageAvailable: !!value.trim() 
+      console.log("⚠️ Cannot send message:", {
+        socketAvailable: !!socket,
+        keyAvailable: !!roomKey,
+        messageAvailable: !!value.trim(),
       });
       return;
     }
@@ -76,54 +100,72 @@ const ChatPage = () => {
         roomId: roomId,
         socketId: socketId,
       });
-
     } catch (error) {
-      console.error('❌ Error sending message:', error);
+      console.error("Error sending message:", error);
     }
   };
 
+  useEffect(() => {
+    if (usersList.length > 0) {
+      console.log("Current users in room:", usersList);
+    }
+  }, [usersList]);
+
+  const handleLeaveRoom = () => {
+    socket.emit("leaveRoom", { roomId, socketId });
+    window.history.back();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-cyan-900 text-white p-4">
-      <div className="socket_print bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-lg p-4 rounded-lg mb-4">
-        <h1 className="text-xl font-semibold text-cyan-400">
-          Socket ID: <span className="text-white">{socketId}</span>
-        </h1>
-        <h2 className="text-lg text-gray-400">
-          Room Key: <span className="font-medium text-cyan-400">{roomId}</span>
-        </h2>
-        {userName && (
-          <h2 className="text-xl font-semibold text-cyan-400">
-            Name: <span className="text-white">{userName}</span>
-          </h2>
-        )}
-      </div>
-      <div className="mb-4" onSubmit={(e) => e.preventDefault()}>
-        <input
-          type="text"
-          onChange={handleInputChange}
-          value={msgIndividual}
-          placeholder="Enter message"
-          className="w-full px-4 py-2 bg-gray-700 bg-opacity-50 text-white placeholder-gray-400 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+    <ChatBackground>
+      <div className="min-h-screen">
+        <ChatHeader
+          roomId={roomId}
+          socketId={socketId}
+          usersList={usersList}
+          isDropdownOpen={isDropdownOpen}
+          setIsDropdownOpen={setIsDropdownOpen}
+          handleLeaveRoom={handleLeaveRoom}
         />
-      </div>
-      <div className="space-y-2">
-        {Object.entries(allMessages).map(([senderIdentity, msgs]) => (
-          <div
-            key={senderIdentity}
-            className="bg-gray-800 bg-opacity-50 p-3 rounded-lg"
-          >
-            <p className="font-semibold text-cyan-400">
-              {senderIdentity === socketId ? 'You' : senderIdentity}:
-            </p>
-            {msgs.map((m, index) => (
-              <p key={index} className="text-gray-300 ml-4">
-                {m}
-              </p>
-            ))}
+        
+
+        <div className="flex flex-col h-[calc(100vh-110px)] md:h-[calc(100vh-88px)]">
+          {" "}
+          <div className="flex-grow overflow-y-auto px-12 py-6">
+            <div className="flex flex-col gap-2">
+              {Object.entries(allMessages).map(([senderIdentity, msgs]) => (
+                <div
+                  key={senderIdentity}
+                  className="bg-[#373737] p-3 rounded-full flex gap-1 items-baseline w-fit transition-all duration-300 ease-in-out animate-message-in"
+                >
+                  <p className="text-[#9F9F9F] font-comfortaa font-medium tracking-wide whitespace-nowrap">
+                    {senderIdentity === socketId ? "You" : senderIdentity} :
+                  </p>
+                  {msgs.map((m, index) => (
+                    <p
+                      key={index}
+                      className="text-white font-comfortaa font-medium text-center tracking-normal break-words max-w-[60vw]"
+                    >
+                      {m}
+                    </p>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+          {/* Input fixed at bottom */}
+          <div className="pb-4 px-4 md:px-8">
+            <input
+              type="text"
+              onChange={handleInputChange}
+              value={msgIndividual}
+              placeholder="You can type your message in here!!"
+              className="w-full px-1 py-1 bg-transparent border-b text-white outline-none font-normal font-comfortaa"
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </ChatBackground>
   );
 };
 

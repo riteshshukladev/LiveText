@@ -8,15 +8,13 @@ function LandingPage() {
   const socket = useSocket();
 
   return (
-    <div className="flex flex-col items-center justify-center mt-20">
-      <h1 className="text-white font-comfortaa font-medium">Live Text</h1>
-
-      <div className="flex flex-col gap-4 items-center">
+    <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col gap-2 items-center mt-24">
         {/* Create New Session Button */}
-        <div className="flex flex-col align-center justify-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col align-center justify-center gap-2 w-auto">
           <button
             onClick={socket.handleGenerateNewKey}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors duration-200 w-full sm:w-auto"
+            className="flex items-center gap-2 w-fit text-white font-extralight font-comfortaa pb-px border-b border-white"
           >
             {socket.loadingState.createSession ? (
               <HashLoader
@@ -25,15 +23,16 @@ function LandingPage() {
                 loading={socket.loadingState}
               />
             ) : (
-              <span className="font-medium">Create New Session</span>
+              <span className="font-medium">New Chat</span>
             )}
           </button>
         </div>
 
         {/* Join Session Form */}
+        <span className="text-white"> or </span>
         <form
           onSubmit={socket.handleInputSessionKey}
-          className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto"
+          className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center sm:items-end"
         >
           {/* Input Container */}
           <div className="relative flex-1">
@@ -44,20 +43,19 @@ function LandingPage() {
               placeholder="Enter session key"
               value={socket.joinSessionKey}
               onChange={socket.handleInputChange}
-              className="w-full pl-4 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none transition-all duration-200"
+              className="py-2 bg-transparent border-b border-white w-fit focus:outline-none text-white placeholder:text-center font-comfortaa placeholder:font-comfortaa text-center"
             />
-            <Lock
+            {/* <Lock
               size={20}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+            /> */}
           </div>
 
           {/* Join Button */}
           <button
             type="submit"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+            className="flex items-center gap-2 w-fit text-white font-extralight font-comfortaa pb-px border-b border-white"
           >
-            
             {socket.loadingState.joinSession ? (
               <HashLoader
                 size={20}
@@ -65,7 +63,7 @@ function LandingPage() {
                 loading={socket.loadingState}
               />
             ) : (
-              <span className="font-medium">Join Session</span>
+              <span className="font-medium pb-1.5">Join Chat</span>
             )}
           </button>
         </form>
