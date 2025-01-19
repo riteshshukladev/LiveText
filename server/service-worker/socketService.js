@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import Room from "../models/room.js";
 // import { encryptMessage, decryptMessage } from "../utils/encryptionUtils.js";
 
-let io; 
+let io;
 
 const initializeSocket = (server) => {
   io = new Server(server, {
@@ -29,6 +29,13 @@ const initializeSocket = (server) => {
           socket.emit("roomKeyUpdate", Array.from(roomKeyBuffer));
 
           console.log(`socketId ${socket.id} has joined the room`);
+          // room users to all the client
+          io.to(roomId).emit("roomUsers", {
+            users: room.socketIdsJoined.map((id) => ({
+              id,
+              displayName: room.names.has(id) ? room.names.get(id) : id,
+            })),
+          });
         }
       } catch (err) {
         console.error("Error joining room:", err);
@@ -41,7 +48,6 @@ const initializeSocket = (server) => {
         if (room) {
           const senderIdentity = room.names.get(socketId) || `${socketId}`;
           const key = Buffer.from(room.roomKey, "hex");
-
 
           io.to(roomId).emit("recievedMessage", {
             senderIdentity,
@@ -66,6 +72,13 @@ const initializeSocket = (server) => {
             room.names.delete(socketId);
             await room.save();
           }
+
+          io.to(roomId).emit("roomUsers", {
+            users: room.socketIdsJoined.map((id) => ({
+              id,
+              displayName: room.names.has(id) ? room.names.get(id) : id,
+            })),
+          });
         }
         socket.leave(roomId);
         console.log(

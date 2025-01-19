@@ -6,6 +6,7 @@ import Background from "./layout/Background";
 import liveTextLogo from "../assets/logo/live-text-logo-4.svg";
 import ErrorModal from "../Modal/ErrorModal";
 
+
 function App() {
   const socket = useSocket();
   const [isHovered, setIsHovered] = useState(false);
