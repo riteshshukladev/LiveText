@@ -135,12 +135,11 @@ const ChatPage = () => {
 
   return (
     <ChatBackground>
-      <div className="min-h-[100dvh]">
+      <div className="min-h-[100dvh] relative">
         <ChatHeader {...headerProps} />
 
-        <div className="flex flex-col h-[calc(100vh-110px)] md:h-[calc(100vh-88px)]">
-          {" "}
-          <div className="flex-grow overflow-y-auto px-4 md:px-12 py-6">
+        <div className="flex flex-col h-[calc(100dvh-110px)] md:h-[calc(100dvh-88px)]">
+          <div className="flex-grow overflow-y-auto px-4 md:px-12 py-6 mb-20 md:mb-0">
             <div className="flex flex-col gap-2">
               {Object.entries(allMessages).map(([senderIdentity, msgs]) => (
                 <div
@@ -162,15 +161,18 @@ const ChatPage = () => {
               ))}
             </div>
           </div>
-          {/* Input fixed at bottom */}
-          <div className="pb-8 md:pb-4 px-4 md:px-8">
-            <input
-              type="text"
-              onChange={handleInputChange}
-              value={msgIndividual}
-              placeholder="You can type your message in here!!"
-              className="w-full px-1 py-1 bg-transparent border-b text-white outline-none font-normal font-comfortaa"
-            />
+
+          {/* Fixed Input at Bottom */}
+          <div className="fixed bottom-0 left-0 right-0 bg-transparent backdrop-blur-sm border-t border-white/10 px-4 py-4 md:py-6">
+            <div className="max-w-7xl mx-auto">
+              <input
+                type="text"
+                onChange={handleInputChange}
+                value={msgIndividual}
+                placeholder="You can type your message in here!!"
+                className="w-full px-4 py-3 bg-transparent border-b border-white/50 text-white outline-none font-normal font-comfortaa placeholder:text-white/30"
+              />
+            </div>
           </div>
         </div>
       </div>
