@@ -2,7 +2,7 @@ import React from 'react';
 
 const Background = ({ children, isLoading }) => {
   return (
-    <div className="screen relative">
+    <div className="screen w-full h-[100dvh]">
       {/* Base Background */}
       <div className="base-background"></div>
       

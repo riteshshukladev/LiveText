@@ -135,7 +135,7 @@ const ChatPage = () => {
 
   return (
     <ChatBackground>
-      <div className="min-h-screen">
+      <div className="min-h-[100dvh]">
         <ChatHeader {...headerProps} />
 
         <div className="flex flex-col h-[calc(100vh-110px)] md:h-[calc(100vh-88px)]">
