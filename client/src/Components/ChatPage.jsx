@@ -163,7 +163,7 @@ const ChatPage = () => {
             </div>
           </div>
           {/* Input fixed at bottom */}
-          <div className="pb-4 px-4 md:px-8">
+          <div className="pb-8 md:pb-4 px-4 md:px-8">
             <input
               type="text"
               onChange={handleInputChange}
