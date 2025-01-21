@@ -140,7 +140,7 @@ const ChatPage = () => {
 
         <div className="flex flex-col h-[calc(100vh-110px)] md:h-[calc(100vh-88px)]">
           {" "}
-          <div className="flex-grow overflow-y-auto px-12 py-6">
+          <div className="flex-grow overflow-y-auto px-4 md:px-12 py-6">
             <div className="flex flex-col gap-2">
               {Object.entries(allMessages).map(([senderIdentity, msgs]) => (
                 <div
@@ -153,7 +153,7 @@ const ChatPage = () => {
                   {msgs.map((m, index) => (
                     <p
                       key={index}
-                      className="text-white font-comfortaa font-medium text-center tracking-normal break-words max-w-[60vw]"
+                      className="text-white font-comfortaa font-medium text-left tracking-normal break-words max-w-[60vw]"
                     >
                       {m}
                     </p>

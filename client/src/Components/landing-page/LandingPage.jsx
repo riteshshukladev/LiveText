@@ -63,7 +63,7 @@ function LandingPage() {
                 loading={socket.loadingState}
               />
             ) : (
-              <span className="font-medium pb-1.5">Join Chat</span>
+              <span className="font-medium md:pb-1.5">Join Chat</span>
             )}
           </button>
         </form>
