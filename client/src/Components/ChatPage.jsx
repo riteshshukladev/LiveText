@@ -163,7 +163,7 @@ const ChatPage = () => {
           </div>
 
           {/* Fixed Input at Bottom */}
-          <div className="fixed bottom-0 left-0 right-0 bg-transparent backdrop-blur-sm border-t border-white/10 px-4 py-4 md:py-6">
+          <div className="absolute bottom-0 left-0 right-0 bg-[#000000]/30 backdrop-blur-sm border-t border-white/10 px-4 py-4">
             <div className="max-w-7xl mx-auto">
               <input
                 type="text"
