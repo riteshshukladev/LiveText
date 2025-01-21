@@ -1,20 +1,20 @@
-import React from 'react'
+import React,{memo} from 'react';
 
-const ChatBackground = ({children}) => {
-    return (
-        <div className="screen relative">
-          {/* Base Background */}
-          <div className="base-background"></div>
+const ChatBackground = memo(({ children }) => {
+  return (
+    <div className="screen relative">
+      {/* Base Background */}
+      <div className="base-background"></div>
           
-          {/* Grainy Background */}
-          <div className="background relative overflow-hidden"></div>
+      {/* Grainy Background */}
+      <div className="background relative overflow-hidden"></div>
           
-          {/* Content */}
-          <div className="relative z-10">
-            {children}
-          </div>
-        </div>
-      );
-}
+      {/* Content */}
+      <div className="relative z-10">
+        {children}
+      </div>
+    </div>
+  );
+});
 
 export default ChatBackground

@@ -1,62 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, memo, useCallback } from "react";
 import { useSocket } from "../Context/SocketContext";
 import { X, ArrowRight } from "lucide-react";
 
+
+const CloseButton = memo(({ onClose }) => (  // Changed syntax here
+  <button 
+    onClick={onClose} 
+    className="absolute top-2 right-2"
+  >
+    <X size={20} />
+  </button>
+));
+
 const NameModal = () => {
+
   const [name, setName] = useState("");
   const { handleNewNameSubmit, onSkip, setShowNameModal } = useSocket();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (!name) {
+        onSkip();
+        return;
+      }
+      handleNewNameSubmit(name);
+    },
+    [name, onSkip, handleNewNameSubmit]
+  );
 
-    if (!name) {
-      onSkip();
-      return;
-    }
-    handleNewNameSubmit(name);
-  };
-
-  const closeNameSubmitModal = (e) => {
-    e.preventDefault();
-    setShowNameModal(false);
-  };
-
-  const handleOverlayClick = (e) => {
-    if (e.target.classList.contains("modal-overlay")) {
+  const closeNameSubmitModal = useCallback(
+    (e) => {
+      e.preventDefault();
       setShowNameModal(false);
-    }
-  };
+    },
+    [setShowNameModal]
+  );
 
-  const handleModalClick = (e) => {
-    e.stopPropagation();
-  };
+  const handleNameChange = useCallback((e) => {
+    setName(e.target.value);
+  }, []);
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center w-full h-full"
-      onClick={handleOverlayClick}
+      
     >
       <div className="absolute inset-0 bg-opacity-10 backdrop-blur-sm"></div>
       <div
         className="relative z-50 flex flex-col gap-4 py-56 px-8 text-white border border-solid border-white rounded-2xl bg-black bg-opacity-30 backdrop-blur-sm mx-6 md:mx-0"
-        onClick={handleModalClick}
+        // onClick={handleModalClick}
       >
-        <button
-          onClick={closeNameSubmitModal}
-          className="absolute top-2 right-2"
-        >
-          <X size={20} />
-        </button>
+        <CloseButton onClose={closeNameSubmitModal} />
 
         <h2 className="font-comfortaa font-extralight pl-3 tracking-wide md:text-base">
           What you want to be called?
         </h2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleNameChange}>
           <div className="relative">
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={handleNameChange}
               placeholder="Name please"
               className="lg:w-72 py-4 px-4 pr-24 bg-transparent border border-solid border-white rounded-full font-comfortaa font-light md:text-sm focus:outline-none"
             />

@@ -4,6 +4,7 @@ import { useSocket } from "../Context/SocketContext";
 import { encryptMessage, decryptMessage } from "../utils/crypto";
 import ChatBackground from "./layout/ChatBackground";
 import ChatHeader from "./ChatHeader";
+import { useCallback, useMemo } from "react";
 
 const ChatPage = () => {
   const { socket, roomKey } = useSocket();
@@ -15,9 +16,6 @@ const ChatPage = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
-
-
-
     if (socket) {
       socket.emit("joinRoom", { roomId, socketId });
 
@@ -111,23 +109,34 @@ const ChatPage = () => {
     }
   }, [usersList]);
 
-  const handleLeaveRoom = () => {
+  const handleLeaveRoom = useCallback(() => {
     socket.emit("leaveRoom", { roomId, socketId });
     window.history.back();
-  };
+  }, [socket, roomId, socketId]);
+
+  const headerProps = useMemo(
+    () => ({
+      roomId,
+      socketId,
+      usersList,
+      isDropdownOpen,
+      setIsDropdownOpen,
+      handleLeaveRoom,
+    }),
+    [
+      roomId,
+      socketId,
+      usersList,
+      isDropdownOpen,
+      setIsDropdownOpen,
+      handleLeaveRoom,
+    ]
+  );
 
   return (
     <ChatBackground>
       <div className="min-h-screen">
-        <ChatHeader
-          roomId={roomId}
-          socketId={socketId}
-          usersList={usersList}
-          isDropdownOpen={isDropdownOpen}
-          setIsDropdownOpen={setIsDropdownOpen}
-          handleLeaveRoom={handleLeaveRoom}
-        />
-        
+        <ChatHeader {...headerProps} />
 
         <div className="flex flex-col h-[calc(100vh-110px)] md:h-[calc(100vh-88px)]">
           {" "}

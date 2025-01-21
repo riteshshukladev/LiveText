@@ -2,9 +2,9 @@ import React from "react";
 import shareSvg from "../assets/svg/share.svg";
 import closeSvg from "../assets/svg/close.svg";
 import ShareModal from "../Modal/ShareModal";
-import {useState} from 'react'
+import {useState, memo} from 'react'
 
-const ChatHeader = ({
+const ChatHeader = memo(({
   roomId,
   socketId,
   usersList,
@@ -86,6 +86,6 @@ const ChatHeader = ({
       </div>
     </header>
   );
-};
+});
 
 export default ChatHeader;
