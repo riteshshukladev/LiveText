@@ -32,8 +32,8 @@
 /* Add this for mobile optimization */
 @media (max-width: 768px) {
   .background {
-    background-size: 400px 400px; /* Even smaller for mobile */
-    transform: translateZ(0); /* Force GPU acceleration */
+    /* background-size: 400px 400px; */
+    
     will-change: transform; /* Optimize animations */
   }
 }
