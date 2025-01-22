@@ -33,7 +33,8 @@
 @media (max-width: 768px) {
   .background {
     /* background-size: 400px 400px; */
-    
+    width: 100dvh;
+    height:100dvh;
     will-change: transform; /* Optimize animations */
   }
 }
