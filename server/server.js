@@ -1,11 +1,11 @@
-import express from 'express';
+import express from "express";
 import cors from "cors";
 import http from "http";
 import initializeSocket from "./service-worker/socketService.js";
 import connectDatabase from "./config/database.js";
 import dotenv from "dotenv";
 import { createRoom, joinRoom } from "./controllers/roomController.js";
-import setName from './service-worker/setName.js';
+import setName from "./service-worker/setName.js";
 
 dotenv.config();
 const app = express();
@@ -20,12 +20,16 @@ await connectDatabase();
 // Initialize socket
 const io = initializeSocket(server);
 
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
+});
+
 // Routes
-app.post('/chat/create-room', createRoom);
-app.post('/chat/join-room', joinRoom);
-app.post('/set-name', setName);
+app.post("/chat/create-room", createRoom);
+app.post("/chat/join-room", joinRoom);
+app.post("/set-name", setName);
 
 const PORT = process.env.PORT || 4001;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

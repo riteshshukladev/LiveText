@@ -12,13 +12,13 @@ function App() {
   const [isHovered, setIsHovered] = useState(false);
   const { loadingState, error, clearError } = useSocket();
 
-  useEffect(() => {
-    if (!socket.connectionState.connected || socket.connectionState.error) {
-      setIsHovered(true);
-    } else {
-      setIsHovered(false);
-    }
-  }, [socket.connectionState.connected, socket.connectionState.error]);
+  // useEffect(() => {
+  //   if (!socket.connectionState.connected || socket.connectionState.error) {
+  //     setIsHovered(true);
+  //   } else {
+  //     setIsHovered(false);
+  //   }
+  // }, [socket.connectionState.connected, socket.connectionState.error]);
 
   const isLoading = loadingState.createSession || loadingState.joinSession;
 
@@ -28,7 +28,7 @@ function App() {
 
       
       {/* Network connection indicator */}
-      <span
+      {/* <span
         className={
           socket.connectionState.connected
             ? "absolute top-4 right-4 bg-green-500 text-white px-1 py-1 rounded-full"
@@ -44,7 +44,7 @@ function App() {
               : "we're using free hosting services, please wait..."}
           </div>
         )}
-      </span>
+      </span> */}
 
       {/* logo */}
 
